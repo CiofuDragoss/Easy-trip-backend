@@ -11,7 +11,9 @@ router = APIRouter(prefix="/auth", tags=["Auth"])
 
 
 
-
+@router.get("/verify_access")
+async def check_access_token(token_data: dict = Depends(verify_token_access)):
+    return token_data
 @router.get("/refresh", response_model=TokenOut)
 async def refresh_token(token_data:dict = Depends(verify_token_refresh)):
     email   = token_data["email"]

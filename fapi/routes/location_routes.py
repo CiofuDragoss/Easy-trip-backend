@@ -39,7 +39,7 @@ async def get_placeid_loc(
     }
     
     
-
+    print("DETAILSLS", DETAILS_URL)
     async with httpx.AsyncClient() as client:
         response=await client.get(f"{DETAILS_URL}/{req.placeId}",headers=headers)
     print(response.json())
@@ -73,10 +73,10 @@ async def location_autocomplete(
 
     }
     print("AUTOO",AUTOCOMPLETE_URL)
+    print("body", body)
     async with httpx.AsyncClient() as client:
         response=await client.post(AUTOCOMPLETE_URL,json=body,headers=headers)
     
-    print(response.json())
     if response.status_code !=200:
         raise HTTPException(
         status_code=status.HTTP_502_BAD_GATEWAY,

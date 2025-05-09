@@ -72,7 +72,6 @@ class TextSearch(BaseModel):
     locationBias:LocationRestriction
     languageCode:str="en"
     maxResultCount:int = 20
-    excludedTypes:list[str]=None
     fieldMask: list[str] = ["places.displayName",
         "places.primaryType",
         "places.types",

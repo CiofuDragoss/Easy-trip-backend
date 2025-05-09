@@ -8,6 +8,8 @@ def wilson_score(rating, n_reviews, z=1.4):
         """
         Calculează Wilson Lower Bound pentru un rating pe 5 stele.
         """
+        if n_reviews == 0:
+                return 0.0
         # 1) Normalizezi în [0,1]
         phat = (rating-1) / 4.0
         # 2) Formula Wilson

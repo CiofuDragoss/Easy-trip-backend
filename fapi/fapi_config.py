@@ -24,7 +24,7 @@ class Settings:
         "GOOGLE_AUTOCOMPLETE_URL", ""
     )
     google_places_details: str = os.getenv(
-        "GOOGLE_PLACES_DETAILS", ""
+        "GOOGLE_PLACES_DETAILS_URL", ""
     )
     google_places_nearby_search: str = os.getenv(
         "GOOGLE_PLACES_NEARBYSEARCH_URL", ""

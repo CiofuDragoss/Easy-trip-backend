@@ -12,63 +12,115 @@ PRICE_LEVEL_MAP = {
     "PRICE_LEVEL_VERY_EXPENSIVE":   1.00,  # 4
 }
 
+
+SHOPPING_ENRICHED={
+    "display":       ("displayName.text",   ""),
+    "primaryType":   ("primaryType",        ""),
+    "types":         ("types",              []),
+    "rating":        ("rating",             0),
+    "placeId":       ("id",                 ""),
+    "ratingCount":   ("userRatingCount",    0),
+    "priceLevel":    ("priceLevel",         ""),
+    "latitude":      ("location.latitude",  None),
+    "longitude":     ("location.longitude", None),
+}
+
 SHOPPING_EXTRA={
-    "keywords":["Mall", "Shopping Centre", "Commercial Centre", "complex"],
+    "mall":["Mall", "Shopping Center", "Commercial Center", "complex"],
     "Mask":["places.displayName",
         "places.primaryType",
         "places.types",
-        "places.containingPlaces",
+        "places.containingPlaces", 
         "places.rating",
         "places.userRatingCount",
         "places.priceLevel",
         "places.photos",
         "places.location",
         "places.regularOpeningHours",
-        "places.placeId"
+        "places.id",
+        "places.addressComponents"
         ]
 }
 SHOPPING_CATEGORY_CONFIG = {
     "Librarii": {
         "nearby_type": ["book_store"],
         "text_query": ["book store", "vintage book store"],
-        "excludedTypes": [],
-        "textExcludedTypes": []
+        "excludedTypes": {"book_store": []},
+        "textExcludedTypes": [],
+        "nearbyIncludedTypes": [],
+        "textIncludedTypes": [],
+        "bannedWordsNearby": [],
+        "bannedWordsText": []
     },
     "Souveniruri & Cadouri": {
         "nearby_type": [],
-        "text_query": ["souvenir shop", "souvenir store"],
-        "excludedTypes": [],
-        "textExcludedTypes": []
+        "text_query": ["souvenir shop", "traditional gifts"],
+        "excludedTypes": {},
+        "textExcludedTypes": [],
+        "nearbyIncludedTypes": [],
+        "textIncludedTypes": [],
+        "bannedWordsNearby": [],
+        "bannedWordsText": []
     },
     "Bijuterii": {
         "nearby_type": ["jewelry_store"],
         "text_query": ["jewelry store"],
-        "excludedTypes": [],
-        "textExcludedTypes": []
+        "excludedTypes": {"jewelry_store": []},
+        "textExcludedTypes": [],
+        "nearbyIncludedTypes": [],
+        "textIncludedTypes": [],
+        "bannedWordsNearby": [],
+        "bannedWordsText": []
     },
     "Moda si accesorii": {
         "nearby_type": ["clothing_store", "shoe_store"],
         "text_query": ["clothing store", "fashion accessories", "footwear store"],
-        "excludedTypes": [],
-        "textExcludedTypes": []
+        "excludedTypes": {"clothing_store": [], "shoe_store": []},
+        "textExcludedTypes": ["jewelry_store"],
+        "nearbyIncludedTypes": [],
+        "textIncludedTypes": [],
+        "bannedWordsNearby": [],
+        "bannedWordsText": []
     },
     "Cosmetice si parfumuri": {
         "nearby_type": [],
         "text_query": ["cosmetics store", "perfume store"],
-        "excludedTypes": [],
-        "textExcludedTypes": []
+        "excludedTypes": {},
+        "textExcludedTypes": [],
+        "nearbyIncludedTypes": [],
+        "textIncludedTypes": [],
+        "bannedWordsNearby": [],
+        "bannedWordsText": []
     },
     "Antichitati": {
         "nearby_type": [],
         "text_query": ["antique store"],
-        "excludedTypes": [],
-        "textExcludedTypes": []
+        "excludedTypes": {},
+        "textExcludedTypes": [],
+        "nearbyIncludedTypes": [],
+        "textIncludedTypes": [
+            "art_gallery",
+            "jewelry_store",
+            "home_goods_store",
+            "furniture_store",
+            "book_store",
+            "discount_store",
+            "home_improvement_store"
+        ],
+        "bannedWordsNearby": [],
+        "bannedWordsText": []
     },
     "Produse locale": {
         "nearby_type": [],
         "text_query": ["traditional store", "traditional food store"],
-        "excludedTypes": [],
-        "textExcludedTypes": []
-    },
+        "excludedTypes": {},
+        "textExcludedTypes": [],
+        "nearbyIncludedTypes": [],
+        "textIncludedTypes": [],
+        "bannedWordsNearby": [],
+        "bannedWordsText": []
+    }
 }
+
+
 
