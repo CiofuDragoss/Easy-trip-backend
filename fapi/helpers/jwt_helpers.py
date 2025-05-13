@@ -16,6 +16,7 @@ def create_jwt_t(email:str,refresh:bool=False)->str:
 
 def verify_token_access(token:str=Depends(oauth2_scheme_access))->dict:
     try:
+        
         payload=jwt.decode(token,settings.secret_key,algorithms=[settings.algorithm])
         return payload
     except jwt.ExpiredSignatureError:

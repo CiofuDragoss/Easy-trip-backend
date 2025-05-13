@@ -10,11 +10,14 @@ from pprint import pprint
 
 PHOTO_ENDPOINT = "https://places.googleapis.com/v1/"
 
+router = APIRouter(dependencies=[Depends(verify_token_access)])
+@router.post("/resolve_img_urls")
 async def resolve_img_urls(photo_names: list[str]):
     tasks=[safe_google_photos(name) for name in photo_names]
     urls=await asyncio.gather(*tasks)
     urls=[url for url in urls if url is not None]
     return urls
+
             
 
 
@@ -78,8 +81,8 @@ async def safe_google_photos(photo_name):
                         params={
                     "skipHttpRedirect": True,
                     "key": settings.google_api,    # your API key
-                    "maxWidthPx": 400,             # note the string keys
-                    "maxHeightPx": 400
+                    "maxWidthPx": 1000,             # note the string keys
+                    "maxHeightPx": 1000
                         }
                )
                if response.status_code == 200:

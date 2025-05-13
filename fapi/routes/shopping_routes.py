@@ -1,36 +1,50 @@
 from pprint import pprint
 from fastapi import APIRouter,Depends,HTTPException,Query,status,Request,WebSocket,WebSocketDisconnect
-from fapi.schemas import NearbySearch, ShoppingRequest,Circle,Center,LocationRestriction,TextSearch
+from fapi.schemas import NearbySearch, ShoppingRequest,Circle,Center,LocationRestriction,TextSearch,Shopping,MainQuestions
 from fapi.helpers.jwt_helpers import verify_token_access
 from fapi.constants.category_config import SHOPPING_CATEGORY_CONFIG
 from fapi.routes.google_routes import google_nearby_search,google_text_search,google_details
 from fapi.fapi_config import settings
 from fapi.rec_algs.shopping_alg import shopping_alg #,night_life_alg,history_alg,food_alg,drinks_alg,experiences_alg
-
+from fapi.helpers.bd_rec_save import save_recs,get_recs
 
 router=APIRouter()
 
 @router.websocket("/ws/recommend")
 
-async def Process_Request(websocket:WebSocket,token_data=Depends(verify_token_access)):
+async def Process_Request(websocket:WebSocket):
     
-
+    
     await websocket.accept()
+
+    auth= websocket.headers.get("authorization")
+    if not auth or not auth.lower().startswith("bearer "):
+        await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
+        return
 
     try:
         payload=await websocket.receive_json()
-        type=payload.get("type")
-        main_q = payload.get("MainQuestions")
-        shop_q = payload.get("ShoppingQuestions")
+        main_q =  MainQuestions.parse_obj(payload["MainQuestions"])
+        type=main_q.category
+        shop_q = Shopping.parse_obj(payload["SecondaryQuestions"])
+        print("Main Questions: ", main_q)
+        print("Secondary Questions: ", shop_q)
         async for update in shopping_alg(main_q, shop_q):
+                
             await websocket.send_json(update)
+
+            if update.get("data",""):
+                await save_recs(auth, update["data"],type)
+                recs=await get_recs(auth)
+
+                
+
+                
         
 
-    except WebSocketDisconnect:
+    except WebSocketDisconnect or Exception:
         print("Client deconectat")
-    finally:
-        if not websocket.client_state.closed:
-            await websocket.close()
+        return
     
         
     

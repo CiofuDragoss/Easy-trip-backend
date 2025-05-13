@@ -23,6 +23,9 @@ SHOPPING_ENRICHED={
     "priceLevel":    ("priceLevel",         ""),
     "latitude":      ("location.latitude",  None),
     "longitude":     ("location.longitude", None),
+    "photos":       ("photos",             []),
+    "openingHours":  ("regularOpeningHours", []),
+    
 }
 
 SHOPPING_EXTRA={
@@ -38,7 +41,6 @@ SHOPPING_EXTRA={
         "places.location",
         "places.regularOpeningHours",
         "places.id",
-        "places.addressComponents"
         ]
 }
 SHOPPING_CATEGORY_CONFIG = {

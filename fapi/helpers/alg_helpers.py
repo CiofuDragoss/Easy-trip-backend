@@ -61,6 +61,7 @@ async def enrich_place(place,extract,category_type,search_type,*args,
     enriched.update({
         "category":    category_type,
         "search_mode": search_type,
+        "highlights":  [], 
         **kwargs
     })
     for var_name,(path_str,fallback) in extract.items():
@@ -71,10 +72,11 @@ async def enrich_place(place,extract,category_type,search_type,*args,
     for fn in args:
         result=fn()
         if inspect.isawaitable(result):
-            var_name,value=await result
+            var_name,value,highlight=await result
         else:
-            var_name,value=result
-
+            var_name,value,highlight=result
+        if highlight:
+            enriched["highlights"].append(highlight)
         enriched[var_name]=value
 
     
@@ -140,11 +142,14 @@ async def enrich_all(raw_data,extract,extra_funcs,config):
                     helpers = [partial(fn, place) for fn in extra_funcs]
                     tasks.append(enrich_place(place,extract,category_type,key,*helpers))
 
-        enriched = await asyncio.gather(*tasks)
+        enriched = await asyncio.gather(*tasks,return_exceptions=True)
 
         
 
-        enriched_places[category_type]=enriched
+        enriched_places[category_type] = [
+            r for r in enriched
+            if not isinstance(r, Exception)
+        ]
 
 
     return enriched_places
@@ -154,14 +159,16 @@ def compute_score(cleaned_data,helpers,ratios):
     loc_score_results = []
     final_cleaned_places=[]
     for place in cleaned_data:
+        place.setdefault("highlights", [])
         loc_scores={}
         score=0
         skip=False
         for fn,ratio in zip(helpers,ratios):
             try:
-                var_name,value=fn(place)
+                var_name,value,highlight=fn(place)
                 score+=ratio*value
-                
+                if highlight:
+                    place["highlights"].append(highlight)
             except:
                 skip=True
                 break
