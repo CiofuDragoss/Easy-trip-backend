@@ -97,19 +97,12 @@ async def shopping_alg(main_questions,shopping_questions):
         "data": cleaned_data
     }
 
+    
 def solve_photos(place):
-    print("salutt")
-    randomm=random.random()
-    print("randomkm",randomm)
     photos=place.get("photos")
-    if randomm<0.1:
-        pprint(photos)
     highlight=None
     if photos:
         photo_names=[photo.get("name") for photo in photos if photo.get("name")]
-        if randomm<0.3:
-            print("POZEEE REZOLVATE")
-            print(photo_names)
         return "photos",photo_names,highlight
     raise Exception()
 
