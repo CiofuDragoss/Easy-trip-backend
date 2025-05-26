@@ -10,9 +10,9 @@ def wilson_score(rating, n_reviews, z=1.4):
         """
         if n_reviews == 0:
                 return 0.0
-        # 1) Normalizezi în [0,1]
+       
         phat = (rating-1) / 4.0
-        # 2) Formula Wilson
+        
         numerator = (
             phat 
             + z*z/(2*n_reviews) 

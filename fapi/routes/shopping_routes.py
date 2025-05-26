@@ -36,10 +36,12 @@ async def Process_Request(websocket:WebSocket):
             if update.get("data",""):
                 await save_recs(auth, update["data"],type)
                 recs=await get_recs(auth)
-                obj = recs[1]
+                obj = recs[-1]
 
                 # dict-ul propriu-zis:
-                data_dict = obj.data  # adaptează dacă are alt nume câmpului
+                data_dict = obj.data # adaptează dacă are alt nume câmpului
+
+                
 
                 # îl dump-ezi în JSON:
                 pprint(data_dict,sort_dicts=False)

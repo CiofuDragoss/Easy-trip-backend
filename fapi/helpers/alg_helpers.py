@@ -79,8 +79,8 @@ async def enrich_place(place,extract,category_type,search_type,*args,
             enriched["highlights"].append(highlight)
         enriched[var_name]=value
 
-    
-
+    print("encrichedd")
+    pprint(enriched)
     return enriched
 
 def verify_place(category_type,key,config,place):

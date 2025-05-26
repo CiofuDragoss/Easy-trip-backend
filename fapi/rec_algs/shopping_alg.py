@@ -15,7 +15,6 @@ from time import perf_counter
     
 
 
-
 async def getMallScore(place,keywords):
     display=place["displayName"]["text"]
     highlight=None
@@ -60,7 +59,7 @@ async def shopping_alg(main_questions,shopping_questions):
         for key in shopping_questions.shoppingExperience
     ]
     
-    helpers_enrich=[partial(getMallScore,keywords=SHOPPING_EXTRA.get("mall")),
+    helpers_enrich=[partial(getMallScore,keywords=SHOPPING_EXTRA.get("mall")),partial(dist,userLat=latitude,userLong=longitude),
                     solve_photos]
     helpers_score=[partial(rating_count,condition=3.6,z=1.4),
                    partial(distance_score,userLat=latitude,userLong=longitude,condition=4000,radius=3000,ratio=1.5),
@@ -97,7 +96,18 @@ async def shopping_alg(main_questions,shopping_questions):
         "data": cleaned_data
     }
 
-    
+def dist(place,userLat,userLong):
+    print("salll")
+    highlight=None
+    latitude=place.get("location").get("latitude")
+    longitude=place.get("location").get("longitude")
+    print("userrr long : ",userLong)
+    print("userrr lat : ",userLat)
+    print("longgggg",longitude)
+    print("latitudeeee",latitude)
+    dist=haversine_distance(latitude,longitude,userLat,userLong)
+    print("dist estee",dist)
+    return "distance",dist,highlight
 def solve_photos(place):
     photos=place.get("photos")
     highlight=None
