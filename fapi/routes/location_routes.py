@@ -91,8 +91,8 @@ async def location_autocomplete(
     for prediction in predictions:
         sf = prediction["placePrediction"]
         sf_text=sf["structuredFormat"]
-        main_text      = sf_text["mainText"].get("text")
-        secondary_text = sf_text["secondaryText"].get("text")
+        main_text      = sf_text.get("mainText",{}).get("text","")
+        secondary_text = sf_text.get("secondaryText",{}).get("text","")
         place_id       = sf["placeId"]
         results.append({
         "main_text":      main_text,

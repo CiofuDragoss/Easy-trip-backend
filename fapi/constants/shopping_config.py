@@ -1,8 +1,6 @@
-from fapi.fapi_config import settings
+
 #urls
-NEARBY_SEARCH_URL=settings.google_places_nearby_search
-TEXT_SEARCH_URL=settings.google_places_text_search
-PLACE_DETAILS_URL=settings.google_places_details
+
 #FOR price score
 PRICE_LEVEL_MAP = {
     "PRICE_LEVEL_FREE":             0.00,  # 0
@@ -13,7 +11,7 @@ PRICE_LEVEL_MAP = {
 }
 
 
-SHOPPING_ENRICHED={
+ENRICHED={
     "display":       ("displayName.text",   ""),
     "primaryType":   ("primaryType",        ""),
     "types":         ("types",              []),
@@ -25,10 +23,12 @@ SHOPPING_ENRICHED={
     "longitude":     ("location.longitude", None),
     "photos":       ("photos",             []),
     "openingHours":  ("regularOpeningHours", []),
+    "reviews":("reviews",[]),
+    
     
 }
 
-SHOPPING_EXTRA={
+EXTRA={
     "mall":["Mall", "Shopping Center", "Commercial Center", "complex"],
     "Mask":["places.displayName",
         "places.primaryType",
@@ -41,9 +41,12 @@ SHOPPING_EXTRA={
         "places.location",
         "places.regularOpeningHours",
         "places.id",
+        "places.reviews",
+        
+        
         ]
 }
-SHOPPING_CATEGORY_CONFIG = {
+CATEGORY_CONFIG = {
     "Librarii": {
         "nearby_type": ["book_store"],
         "text_query": ["book store", "vintage book store"],
@@ -115,6 +118,16 @@ SHOPPING_CATEGORY_CONFIG = {
     "Produse locale": {
         "nearby_type": [],
         "text_query": ["traditional store", "traditional food store"],
+        "excludedTypes": {},
+        "textExcludedTypes": [],
+        "nearbyIncludedTypes": [],
+        "textIncludedTypes": [],
+        "bannedWordsNearby": [],
+        "bannedWordsText": []
+    },
+    "Alte locuri interesante": {
+        "nearby_type": ["shopping_mall"],
+        "text_query": ["local market"],
         "excludedTypes": {},
         "textExcludedTypes": [],
         "nearbyIncludedTypes": [],

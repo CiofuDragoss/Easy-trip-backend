@@ -1,14 +1,19 @@
 from pprint import pprint
 from fastapi import APIRouter,Depends,HTTPException,Query,status,Request,WebSocket,WebSocketDisconnect
-from fapi.schemas import NearbySearch, ShoppingRequest,Circle,Center,LocationRestriction,TextSearch,Shopping,MainQuestions
+from fapi.schemas import NearbySearch, ShoppingRequest,Circle,Center,LocationRestriction,TextSearch,SecondaryQuestions,MainQuestions
 from fapi.helpers.jwt_helpers import verify_token_access
-from fapi.constants.category_config import SHOPPING_CATEGORY_CONFIG
 from fapi.routes.google_routes import google_nearby_search,google_text_search,google_details
 from fapi.fapi_config import settings
 from fapi.rec_algs.shopping_alg import shopping_alg #,night_life_alg,history_alg,food_alg,drinks_alg,experiences_alg
+from fapi.rec_algs.history_alg import history_alg
 from fapi.helpers.bd_rec_save import save_recs,get_recs
 import json
 router=APIRouter()
+
+ALG_MAP = {
+    "shopping":                shopping_alg,
+    
+}
 
 @router.websocket("/ws/recommend")
 
@@ -26,9 +31,8 @@ async def Process_Request(websocket:WebSocket):
         payload=await websocket.receive_json()
         main_q =  MainQuestions.model_validate(payload["MainQuestions"])
         type=main_q.category
-        shop_q = Shopping.model_validate(payload["SecondaryQuestions"])
-        print("Main Questions: ", main_q)
-        print("Secondary Questions: ", shop_q)
+        shop_q = SecondaryQuestions.model_validate(payload["SecondaryQuestions"])
+        
         async for update in shopping_alg(main_q, shop_q):
                 
             await websocket.send_json(update)

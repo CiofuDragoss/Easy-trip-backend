@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status, Request
 from fapi.helpers.jwt_helpers import verify_token_access
 from fapi.fapi_config import settings
 from fapi.schemas import NearbySearch, TextSearch, PlaceDetails
-from fapi.constants.category_config import NEARBY_SEARCH_URL,TEXT_SEARCH_URL,PLACE_DETAILS_URL
+from fapi.constants.general_config import NEARBY_SEARCH_URL,TEXT_SEARCH_URL,PLACE_DETAILS_URL
 import httpx
 import asyncio
 from fapi.constants.semaphores import SEMAPHORE_DETAILS,SEMAPHORE_PHOTOS
@@ -16,6 +16,7 @@ async def resolve_img_urls(photo_names: list[str]):
     tasks=[safe_google_photos(name) for name in photo_names]
     urls=await asyncio.gather(*tasks)
     urls=[url for url in urls if url is not None]
+    print(urls)
     return urls
 
             
@@ -78,6 +79,7 @@ async def safe_google_photos(photo_name):
      async with SEMAPHORE_PHOTOS:
           async with httpx.AsyncClient() as client:
                response=await client.get(f"{PHOTO_ENDPOINT}{photo_name}/media",
+                                         timeout=httpx.Timeout(10.0, read=20.0),
                         params={
                     "skipHttpRedirect": True,
                     "key": settings.google_api,    # your API key

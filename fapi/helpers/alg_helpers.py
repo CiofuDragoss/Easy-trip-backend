@@ -1,5 +1,6 @@
 import asyncio
 import math
+import pandas as pd
 from fapi.constants.executors import DEFAULT_THREAD_POOL,DEFAULT_PROCESS_POOL
 from fapi.helpers.math_helpers import wilson_score,gauss_score,haversine_distance
 from fapi.schemas import LocationRestriction,Circle,Center,NearbySearch,TextSearch
@@ -155,7 +156,7 @@ async def enrich_all(raw_data,extract,extra_funcs,config):
     return enriched_places
 
 
-def compute_score(cleaned_data,helpers,ratios):
+def compute_score(cleaned_data,helpers,ratios,criteria_classification,needs_normalization,v=0.5):
     loc_score_results = []
     final_cleaned_places=[]
     for place in cleaned_data:
@@ -163,10 +164,9 @@ def compute_score(cleaned_data,helpers,ratios):
         loc_scores={}
         score=0
         skip=False
-        for fn,ratio in zip(helpers,ratios):
+        for fn,ratio,classification,normalization in zip(helpers,ratios,criteria_classification,needs_normalization):
             try:
                 var_name,value,highlight=fn(place)
-                score+=ratio*value
                 if highlight:
                     place["highlights"].append(highlight)
             except:
@@ -174,12 +174,66 @@ def compute_score(cleaned_data,helpers,ratios):
                 break
             
             loc_scores[var_name]=value
+            loc_scores[var_name+'_ratio']=ratio
+            loc_scores[var_name+"_clasif"]=classification
+            loc_scores[var_name+"_norm"]=normalization
         if skip:
             continue
+
         loc_scores["placeId"]=place.get("placeId")
-        loc_scores["mainScore"]=round(score/len(ratios),5)
         loc_score_results.append(loc_scores)
+
+
+    #start VIKOR
+
+    df = pd.DataFrame(loc_score_results)
+    if df.empty:
+        return []
     
+    all_columns = list(df.columns)
+    criteria=[]
+
+    for col in all_columns:
+        if col.endswith("_norm"):
+            var_base=col[:-len("_norm")]
+            criteria.append(var_base)
+
+    #normalizam (daca este nevoie) conform clasificarii (benficiu sau cost (+ respectiv -)) si calculam distantele
+    for var in criteria:
+
+        norm=f"{var}_norm"
+        clasif=f"{var}_clasif"
+
+        if df[norm].any():
+            values=df[var].astype(float)
+            fmin=values.min()
+            fmax=values.max()
+
+            span=fmax-fmin
+
+            if df[clasif].eq("-").any():
+
+                df[var]=(fmax-values)/span
+            
+            else:
+                df[var]=(values-fmin)/span
+
+        values=df[var].astype(float)
+        fmax=values.max()
+        fmin=values.min()
+
+        df[var]=(fmax-values)/(fmax-fmin)
+        
+    #cleanup,nu mai avem nevoie de coloanele norm si clasif
+    cols_to_remove = [col for col in df.columns if col.endswith("_norm") or col.endswith("_clasif")]
+
+    df.drop(columns=cols_to_remove, inplace=True)
+
+
+    
+        
+
+    #END VIKOR
     score_map = {
         entry["placeId"]: {
             k: v for k, v in entry.items() if k != "placeId"

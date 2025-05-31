@@ -1,4 +1,8 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr,ConfigDict
+
+
+class SecondaryQuestions(BaseModel):
+    model_config = ConfigDict(extra='allow')
 
 class AuthIn(BaseModel):
     email:EmailStr
@@ -30,7 +34,6 @@ class MainQuestions(BaseModel):
     budget: float
     category:str
     distance:int
-    handicap:bool
     region: Region
 
 class ShoppingRequest(BaseModel):
