@@ -32,5 +32,8 @@ class Settings:
     google_places_text_search: str = os.getenv(
         "GOOGLE_PLACES_TEXTSEARCH_URL", ""
     )
+    google_weather_api:str=os.getenv(
+        "GOOGLE_WEATHER_URL",""
+    )
 
 settings = Settings()

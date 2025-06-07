@@ -58,14 +58,14 @@ CATEGORY_CONFIG = {
         "bannedWordsText": []
     },
     "Souveniruri & Cadouri": {
-        "nearby_type": [],
-        "text_query": ["souvenir shop", "traditional gifts"],
+        "nearby_type": ["gift_shop"],
+        "text_query": ["souvenirs", "traditional gifts"],
         "excludedTypes": {},
-        "textExcludedTypes": [],
+        "textExcludedTypes": ["supermarket"],
         "nearbyIncludedTypes": [],
         "textIncludedTypes": [],
-        "bannedWordsNearby": [],
-        "bannedWordsText": []
+        "bannedWordsNearby": ["online","print"],
+        "bannedWordsText": ["online","print"]
     },
     "Bijuterii": {
         "nearby_type": ["jewelry_store"],

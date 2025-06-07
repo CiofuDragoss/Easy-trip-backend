@@ -1,18 +1,9 @@
 
-#urls
-
-#FOR price score
-PRICE_LEVEL_MAP = {
-    "PRICE_LEVEL_FREE":             0.00,  # 0
-    "PRICE_LEVEL_INEXPENSIVE":      0.25,  # 1
-    "PRICE_LEVEL_MODERATE":         0.50,  # 2
-    "PRICE_LEVEL_EXPENSIVE":        0.75,  # 3
-    "PRICE_LEVEL_VERY_EXPENSIVE":   1.00,  # 4
-}
 
 
 ENRICHED={
     "display":       ("displayName.text",   ""),
+    "displayStruct":       ("displayName",   ""),
     "primaryType":   ("primaryType",        ""),
     "types":         ("types",              []),
     "rating":        ("rating",             0),
@@ -28,6 +19,22 @@ ENRICHED={
 }
 
 EXTRA={
+    "QUERY_SCORE_MAP":{
+        "art museum":0.9,
+        "history museum":0.2,
+        "art_gallery":1,
+        "monument":0.3,
+        "historical_place":0.2,
+        "landmark":0.2,
+        "historical places":0.3,
+        "art_studio":1,
+        "sculpture":0.5,
+        "art expo":1,
+        "art gallery":1,
+        "museum":0.5,
+
+
+    },
     "Mask":["places.displayName",
         "places.primaryType",
         "places.types",
@@ -45,17 +52,17 @@ EXTRA={
 CATEGORY_CONFIG = {
     "Muzee": {
         "nearby_type": ["museum"],
-        "text_query": ["art museum", "history museum"],
+        "text_query": ["art museum","history museum"],
         "excludedTypes": {"museum": []},
-        "textExcludedTypes": [],
+        "textExcludedTypes": ["library"],
         "nearbyIncludedTypes": [],
         "textIncludedTypes": [],
         "bannedWordsNearby": [],
         "bannedWordsText": []
     },
     "Galerii de arta": {
-        "nearby_type": ["art_gallery"],
-        "text_query": [],
+        "nearby_type": ["art_gallery","art_studio"],
+        "text_query": ["art gallery","art expo"],
         "excludedTypes": {"art_gallery":[]},
         "textExcludedTypes": [],
         "nearbyIncludedTypes": [],
@@ -64,19 +71,19 @@ CATEGORY_CONFIG = {
         "bannedWordsText": []
     },
     "Monumente": {
-        "nearby_type": ["monument"],
+        "nearby_type": ["monument","sculpture"],
         "text_query": [],
         "excludedTypes": {"monument": []},
-        "textExcludedTypes": ["jewelry_store"],
+        "textExcludedTypes": [],
         "nearbyIncludedTypes": [],
         "textIncludedTypes": [],
         "bannedWordsNearby": [],
         "bannedWordsText": []
     },
     "Arhitectura": {
-        "nearby_type": ["historical_place","landmark"],
+        "nearby_type": ["historical_place","cultural_landmark"],
         "text_query": ["historical places"],
-        "excludedTypes": {},
+        "excludedTypes": {"historical_place":[],"landmark":[]},
         "textExcludedTypes": [],
         "nearbyIncludedTypes": [],
         "textIncludedTypes": [],

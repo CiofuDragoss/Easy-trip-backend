@@ -6,13 +6,20 @@ from fapi.routes.google_routes import google_nearby_search,google_text_search,go
 from fapi.fapi_config import settings
 from fapi.rec_algs.shopping_alg import shopping_alg #,night_life_alg,history_alg,food_alg,drinks_alg,experiences_alg
 from fapi.rec_algs.history_alg import history_alg
+from fapi.rec_algs.experience_alg import experience_alg
 from fapi.helpers.bd_rec_save import save_recs,get_recs
 import json
 router=APIRouter()
 
 ALG_MAP = {
-    "shopping":                shopping_alg,
-    
+    "Shopping": shopping_alg,
+    "Istorie & Arta":  history_alg,
+    "Experiente" : experience_alg
+    # dacă vei avea şi alte categorii, adaugă-le aici:
+    # "food":      food_alg,
+    # "drinks":    drinks_alg,
+    # "experiences": experiences_alg,
+    # etc.
 }
 
 @router.websocket("/ws/recommend")
@@ -31,24 +38,36 @@ async def Process_Request(websocket:WebSocket):
         payload=await websocket.receive_json()
         main_q =  MainQuestions.model_validate(payload["MainQuestions"])
         type=main_q.category
+        print("typee:", type)
         shop_q = SecondaryQuestions.model_validate(payload["SecondaryQuestions"])
+        alg_function = ALG_MAP.get(type)
         
-        async for update in shopping_alg(main_q, shop_q):
+        async for update in alg_function(main_q, shop_q):
                 
-            await websocket.send_json(update)
+            
 
             if update.get("data",""):
+
                 await save_recs(auth, update["data"],type)
                 recs=await get_recs(auth)
-                obj = recs[-1]
 
-                # dict-ul propriu-zis:
-                data_dict = obj.data # adaptează dacă are alt nume câmpului
+                filtered_data = {}
+                for category, places in update["data"].items():
+                    filtered_places = []
+                    for place in places:
+                        # construiești un nou dict care să conțină TOT din place, 
+                        # cu excepția cheilor "reviews" și "photos"
+                        pr = {k: v for k, v in place.items() if k not in ("reviews", "photos","openingHours")}
+                        filtered_places.append(pr)
+                    filtered_data[category] = filtered_places
 
+                # acum faci pprint pe filtered_data, fără să-ți mai apară reviews și photos:
+                #pprint(filtered_data, sort_dicts=False)
                 
 
-                # îl dump-ezi în JSON:
-                pprint(data_dict,sort_dicts=False)
+
+            await websocket.send_json(update)
+                
                 
 
                 
