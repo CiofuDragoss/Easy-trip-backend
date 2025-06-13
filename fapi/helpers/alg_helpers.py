@@ -10,7 +10,7 @@ from functools import partial
 from pprint import pprint
 from fapi.helpers.math_helpers import wilson_score,gauss_score,haversine_distance
 from fapi.constants.general_config import PRICE_LEVEL_MAP
-
+import traceback
 
 def solve_photos(place):
     photos=place.get("photos","")
@@ -82,7 +82,7 @@ async def fetch_places(category,loc_restr,category_extra):
             nearby_tasks.append((google_nearby_search(req),t))
 
             
-        for i in category_type["nearby_search_non_prim_types"]:
+        for i in category_type.get("nearby_search_non_prim_types",[]):
             req = NearbySearch(
                 locationRestriction=loc_restr,
                 excludedTypes= category_type["excludedTypes"].get(i, []),
@@ -111,7 +111,7 @@ async def fetch_places(category,loc_restr,category_extra):
         text_results   = await asyncio.gather(*text_coros)   if text_coros   else []
 
         for resp, t in zip(nearby_results, nearby_keys):
-            print("cheie:",t)
+            
             
             entry["nearby_responses"].append({
                 "search_QUERY":   t,         
@@ -125,7 +125,7 @@ async def fetch_places(category,loc_restr,category_extra):
                 "places": resp.get("places", [])
             })
 
-            print("lungime resp text:",len(resp.get("places")))
+            
         
         raw_data.append(entry)
     
@@ -157,7 +157,9 @@ async def enrich_place(place,extract,category_type,search_type,*args,
             path=path_str.split(".")
 
             enriched[var_name]=get_data(place,path,fallback)
+    
     for fn in args:
+            fn=partial(fn, enriched)
             result=fn()
             if inspect.isawaitable(result):
                 var_name,value,highlight=await result
@@ -165,32 +167,55 @@ async def enrich_place(place,extract,category_type,search_type,*args,
                 var_name,value,highlight=result
             if highlight:
                 enriched["highlights"].append(highlight)
+            
             enriched[var_name]=value
     
-   
+    print("\n")
+    
+    
+    print("tip principal",enriched["primaryType"])
+    print("price range",enriched["priceLevel"])
+    print("display:",enriched["display"])
+    print("tipuri: ",enriched["types"])
+    print("LiveMusic:",       enriched.get("liveMusic", ""))
+    print("Sports:",   enriched.get("sports", ""))
+    print("openingHours",enriched["openingHours"])
+    
     return enriched
 
-def verify_place(category_type,key,config,place):
+def verify_place(category_type,key,config,place,query):
     types=place.get("types",[])
+    primary_type=place.get("primaryType")
     display = place.get("displayName", {}).get("text", "").lower()
     if key=="nearby_search":
-        included=config[category_type]["nearbyIncludedTypes"]
+        included=config[category_type].get("nearbyIncludedTypes").get(query,[])
+        excludedPrimaryTypes=config[category_type].get("nearbyExcludedPrimaryTypes",[])
         bannedWords=config[category_type]["bannedWordsNearby"]
         if not any(t in included for t in types) and included:
             return False
-        if any(t in display for t in bannedWords) and bannedWords:
+        
+        if excludedPrimaryTypes and primary_type in excludedPrimaryTypes:
             return False
+        if any(t in display for t in bannedWords) and bannedWords:
+            print("eliminare in nearby de la banned words")
+            return False
+        
         
     else:
         included=config[category_type]["textIncludedTypes"]
         excluded=config[category_type]["textExcludedTypes"]
         bannedWords=config[category_type]["bannedWordsText"]
-        types=place.get("types",[])
+        excludedPrimaryTypes=config[category_type].get("textExcludedPrimaryTypes",[])
         if not any(t in included for t in types) and included:
+            print("eliminare in text search de la included")
             return False
         if any(t in excluded for t in types) and excluded:
+            print("eliminare in text search de la excluded")
+            return False
+        if excludedPrimaryTypes and primary_type in excludedPrimaryTypes:
             return False
         if any(t in display for t in bannedWords) and bannedWords:
+            print("eliminare in text search de la banned words")
             return False
     
     return True
@@ -206,33 +231,34 @@ async def enrich_all(raw_data,extract,extra_funcs,config):
         placeId_set=set()
         
         category_type=entry["category_type"]
+        print("categoriee",category_type)
         for key, responses in [
             ("nearby_search", entry["nearby_responses"]),
             ("text_search",   entry["text_responses"]),
             
             
         ]:
+            
             for resp in responses:
                 query=resp.get("search_QUERY","")
                 for place in resp.get("places", []):
                     place_id=place.get("id")
                     
                     if place_id in placeId_set:
-                        
+                        print("eliminare in placeSET")
                         continue
                     
                     
-                    if not verify_place(category_type,key,config,place):
+                    if not verify_place(category_type,key,config,place,query):
                         
                         continue
                     
                     placeId_set.add(place_id)
                     
-                    helpers = [partial(fn, place) for fn in extra_funcs]
-                    tasks.append(enrich_place(place,extract,category_type,key,*helpers,search_QUERY=query))
+                    tasks.append(enrich_place(place,extract,category_type,key,*extra_funcs,search_QUERY=query))
 
         enriched = await asyncio.gather(*tasks,return_exceptions=True)
-
+        
         
 
         enriched_places[category_type] = [
@@ -244,7 +270,7 @@ async def enrich_all(raw_data,extract,extra_funcs,config):
     return enriched_places
 
 
-def compute_score(cleaned_data,helpers,ratios,criteria_classification,needs_normalization,v=0.5):
+def compute_score(cleaned_data,helpers,ratios,criteria_classification,needs_normalization,v=0.5,max_places=2,min_places=6):
     if not cleaned_data:
         print("sal")
         return []
@@ -256,7 +282,7 @@ def compute_score(cleaned_data,helpers,ratios,criteria_classification,needs_norm
         loc_scores={}
         
         skip=False
-        for fn,ratio,classification,normalization in zip(helpers,ratios,criteria_classification,needs_normalization):
+        for fn,ratio,classification,normalization in zip(helpers,ratios,criteria_classification,needs_normalization,):
            
             try:
                
@@ -279,9 +305,12 @@ def compute_score(cleaned_data,helpers,ratios,criteria_classification,needs_norm
         loc_scores["placeId"]=place.get("placeId")
         loc_score_results.append(loc_scores)
 
-    if not loc_score_results:
-        print("sallll")
+    if not loc_score_results :
+        
         return []
+    
+    
+
 
     #start VIKOR
 
@@ -312,10 +341,9 @@ def compute_score(cleaned_data,helpers,ratios,criteria_classification,needs_norm
             span=fmax-fmin
 
             if df[clasif].eq("-").any():
-                print("Inainte de normalizare(tip cost): ",df[var])
-                print("NORMALIZAM: ", var)
+                
                 df[var]=(fmax-values)/span
-                print("rezultate",df[var])
+                
             else:
                 df[var]=(values-fmin)/span
 
@@ -358,6 +386,7 @@ def compute_score(cleaned_data,helpers,ratios,criteria_classification,needs_norm
         for entry in loc_score_results
     }
     
+    
     for place in cleaned_data:
         id=place.get("placeId")
         scores=score_map.get(id,None)
@@ -370,11 +399,18 @@ def compute_score(cleaned_data,helpers,ratios,criteria_classification,needs_norm
             
             final_cleaned_places.append(final_place)
 
-    
+    if len(final_cleaned_places)==1:
+        place=final_cleaned_places[0]
+        id=place.get("placeId")
+        vikor_vars=vikor_map.get(id)
+        for key in vikor_vars:
+            place.pop(key, None)
+        
+        return [place]
     final_cleaned_places.sort(key=lambda x: x["Q"])
     print("lungime final places:",len(final_cleaned_places))
     n=len(final_cleaned_places)
-    cutoff = math.ceil(n * 0.3) if math.ceil(n*0.3)>8 else 7
+    cutoff = math.ceil(n * 0.5) if math.ceil(n*0.5)<max_places else min_places
     top_locations=final_cleaned_places[:cutoff]
     print("lungime top locs places:",len(top_locations))
     return top_locations

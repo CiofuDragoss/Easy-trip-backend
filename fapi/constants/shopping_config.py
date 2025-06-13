@@ -26,6 +26,7 @@ ENRICHED={
     "reviews":("reviews",[]),
     
     
+    
 }
 
 EXTRA={
@@ -42,6 +43,7 @@ EXTRA={
         "places.regularOpeningHours",
         "places.id",
         "places.reviews",
+        "places.priceRange",
         
         
         ]
@@ -62,7 +64,7 @@ CATEGORY_CONFIG = {
         "text_query": ["souvenirs", "traditional gifts"],
         "excludedTypes": {},
         "textExcludedTypes": ["supermarket"],
-        "nearbyIncludedTypes": [],
+        "nearbyIncludedTypes": {},
         "textIncludedTypes": [],
         "bannedWordsNearby": ["online","print"],
         "bannedWordsText": ["online","print"]
@@ -72,7 +74,7 @@ CATEGORY_CONFIG = {
         "text_query": ["jewelry store"],
         "excludedTypes": {"jewelry_store": []},
         "textExcludedTypes": [],
-        "nearbyIncludedTypes": [],
+        "nearbyIncludedTypes": {},
         "textIncludedTypes": [],
         "bannedWordsNearby": [],
         "bannedWordsText": []
@@ -82,7 +84,7 @@ CATEGORY_CONFIG = {
         "text_query": ["clothing store", "fashion accessories", "footwear store"],
         "excludedTypes": {"clothing_store": [], "shoe_store": []},
         "textExcludedTypes": ["jewelry_store"],
-        "nearbyIncludedTypes": [],
+        "nearbyIncludedTypes": {},
         "textIncludedTypes": [],
         "bannedWordsNearby": [],
         "bannedWordsText": []
@@ -92,7 +94,7 @@ CATEGORY_CONFIG = {
         "text_query": ["cosmetics store", "perfume store"],
         "excludedTypes": {},
         "textExcludedTypes": [],
-        "nearbyIncludedTypes": [],
+        "nearbyIncludedTypes": {},
         "textIncludedTypes": [],
         "bannedWordsNearby": [],
         "bannedWordsText": []
@@ -102,7 +104,7 @@ CATEGORY_CONFIG = {
         "text_query": ["antique store"],
         "excludedTypes": {},
         "textExcludedTypes": [],
-        "nearbyIncludedTypes": [],
+        "nearbyIncludedTypes": {},
         "textIncludedTypes": [
             "art_gallery",
             "jewelry_store",
@@ -120,7 +122,7 @@ CATEGORY_CONFIG = {
         "text_query": ["traditional store", "traditional food store"],
         "excludedTypes": {},
         "textExcludedTypes": [],
-        "nearbyIncludedTypes": [],
+        "nearbyIncludedTypes": {},
         "textIncludedTypes": [],
         "bannedWordsNearby": [],
         "bannedWordsText": []
@@ -130,7 +132,7 @@ CATEGORY_CONFIG = {
         "text_query": ["local market"],
         "excludedTypes": {},
         "textExcludedTypes": [],
-        "nearbyIncludedTypes": [],
+        "nearbyIncludedTypes": {},
         "textIncludedTypes": [],
         "bannedWordsNearby": [],
         "bannedWordsText": []

@@ -7,19 +7,22 @@ from fapi.fapi_config import settings
 from fapi.rec_algs.shopping_alg import shopping_alg #,night_life_alg,history_alg,food_alg,drinks_alg,experiences_alg
 from fapi.rec_algs.history_alg import history_alg
 from fapi.rec_algs.experience_alg import experience_alg
+from fapi.rec_algs.drinks_alg import drinks_alg
+from fapi.rec_algs.food_alg import food_alg
 from fapi.helpers.bd_rec_save import save_recs,get_recs
+from fapi.rec_algs.nightlife_alg import nightlife_alg
+from fapi.rec_algs.itinerary_alg import itinerary_alg
 import json
 router=APIRouter()
 
 ALG_MAP = {
     "Shopping": shopping_alg,
     "Istorie & Arta":  history_alg,
-    "Experiente" : experience_alg
-    # dacă vei avea şi alte categorii, adaugă-le aici:
-    # "food":      food_alg,
-    # "drinks":    drinks_alg,
-    # "experiences": experiences_alg,
-    # etc.
+    "Experiente" : experience_alg,
+    "Mancare":food_alg,
+    "Bauturi":drinks_alg,
+    "Viata de Noapte": nightlife_alg,
+    "itinerary":itinerary_alg
 }
 
 @router.websocket("/ws/recommend")
@@ -67,13 +70,21 @@ async def Process_Request(websocket:WebSocket):
 
 
             await websocket.send_json(update)
+
+            if update.get("data",""):
+                await websocket.close(code=status.WS_1000_NORMAL_CLOSURE)
+                return
+        
+
                 
                 
 
                 
         
 
-    except WebSocketDisconnect or Exception:
+    except WebSocketDisconnect or Exception as e:
+        print(e)
+        
         print("Client deconectat")
         return
     
