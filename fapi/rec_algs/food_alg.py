@@ -8,7 +8,7 @@ from fapi.helpers.alg_helpers import fetch_places,enrich_all,compute_score,price
 from fapi.helpers.math_helpers import gauss_score
 from functools import partial
 from pprint import pprint
-async def food_alg(main_questions,secondary_questions):
+async def food_alg(main_questions,secondary_questions,condition=1500):
     loop = asyncio.get_running_loop()
     distance=main_questions.distance*1000
     budget= main_questions.budget
@@ -62,7 +62,7 @@ async def food_alg(main_questions,secondary_questions):
         partial(price_score,budget=budget,sigma=0.45),
         partial(rating_score,condition=3.6,z=1.4),
         partial(meal_type_score,meal_type=meal_type),
-                   partial(dist,userLat=latitude,userLong=longitude,condition=2800,radius=distance,ratio=1.5),
+                   partial(dist,userLat=latitude,userLong=longitude,condition=condition,radius=distance,ratio=1.5),
                    partial(vegan_score,vegan=vegan),
                    partial(outdoor_score,outdoor=outdoor)
                    ]

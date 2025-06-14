@@ -1,6 +1,7 @@
 import asyncio
 import datetime
 import random
+from fapi.schemas import Circle,LocationRestriction,Center
 async def itinerary_alg(main_questions, sec_q):
     
     loop = asyncio.get_running_loop()
@@ -19,8 +20,16 @@ async def itinerary_alg(main_questions, sec_q):
     shopping_categories=sec_q.shoppingCategories
     end_day=sec_q.endDayType
     intensity=sec_q.intensity
+    food_types=sec_q.foodTypes
     
-
+    circle=Circle(
+        center=Center(
+            latitude=latitude,
+            longitude=longitude
+        ),
+        radius=distance
+    )
+    loc_restr = LocationRestriction(circle=circle)
     yield {
         "stage": "final",
         "data": []
@@ -36,23 +45,6 @@ def period_launch(circle,intensity,included=False):
 def period_afternoon(circle,intensity,included=True):
     pass
 
-def create_food_sec_questions(food_types,meal_type):
-    now=datetime.now()
-    seed = int(now.timestamp())
-    random.seed(seed)
-    
-    vegan           = 0
-    outdoor         = 1
-    restaurant_type = random.uniform(0.45, 8)
-    sec_questions={
-        food_types: food_types,
-        meal_type: meal_type,
-        vegan: vegan,
-        outdoor: outdoor,
-        restaurant_type: restaurant_type,
-
-
-    }
 
 
 

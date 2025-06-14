@@ -34,7 +34,7 @@ def rating_score(place,condition=None,z=1.4):
         highlight="Locatia aceasta are ratinguri excelente."
     return "ratingScore",round(ratingScore,5),highlight
 
-def dist(place,userLat,userLong,radius,condition=None,ratio=1.5):
+def dist(place,userLat,userLong,radius,condition=10,ratio=1.5):
     highlight=None
     sigma=radius/ratio
     latitude=place.get("latitude")
@@ -417,6 +417,17 @@ def compute_score(cleaned_data,helpers,ratios,criteria_classification,needs_norm
 
 
 
+def location_restriction(latitude,longitude,distance):
+    circle=Circle(
+        center=Center(
+            latitude=latitude,
+            longitude=longitude
+        ),
+        radius=distance
+    )
+    loc_restr = LocationRestriction(circle=circle)
+
+    return loc_restr
 
 
     
