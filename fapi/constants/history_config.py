@@ -21,7 +21,7 @@ ENRICHED={
 EXTRA={
     "QUERY_SCORE_MAP":{
         "art museum":0.9,
-        "history museum":0.2,
+        "history museum":0.4,
         "art_gallery":1,
         "monument":0.3,
         "historical_place":0.2,
@@ -55,8 +55,8 @@ CATEGORY_CONFIG = {
         "text_query": ["art museum","history museum"],
         "excludedTypes": {"museum": []},
         "textExcludedTypes": ["library"],
-        "nearbyIncludedTypes": [],
-        "textIncludedTypes": [],
+        "nearbyIncludedTypes": {},
+        "textIncludedTypes": ["museum"],
         "bannedWordsNearby": [],
         "bannedWordsText": []
     },
@@ -65,7 +65,7 @@ CATEGORY_CONFIG = {
         "text_query": ["art gallery","art expo"],
         "excludedTypes": {"art_gallery":[]},
         "textExcludedTypes": [],
-        "nearbyIncludedTypes": [],
+        "nearbyIncludedTypes": {},
         "textIncludedTypes": [],
         "bannedWordsNearby": [],
         "bannedWordsText": []
@@ -75,7 +75,7 @@ CATEGORY_CONFIG = {
         "text_query": [],
         "excludedTypes": {"monument": []},
         "textExcludedTypes": [],
-        "nearbyIncludedTypes": [],
+        "nearbyIncludedTypes": {},
         "textIncludedTypes": [],
         "bannedWordsNearby": [],
         "bannedWordsText": []
@@ -85,7 +85,7 @@ CATEGORY_CONFIG = {
         "text_query": ["historical places"],
         "excludedTypes": {"historical_place":[],"landmark":[]},
         "textExcludedTypes": [],
-        "nearbyIncludedTypes": [],
+        "nearbyIncludedTypes": {},
         "textIncludedTypes": [],
         "bannedWordsNearby": [],
         "bannedWordsText": []

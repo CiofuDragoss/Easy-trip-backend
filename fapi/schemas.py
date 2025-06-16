@@ -33,7 +33,7 @@ class Shopping(BaseModel):
 class MainQuestions(BaseModel):
     budget: float
     category:str
-    distance:int
+    distance:float
     region: Region
 
 class ShoppingRequest(BaseModel):

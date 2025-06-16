@@ -22,7 +22,7 @@ from functools import partial
 
 
 
-async def shopping_alg(main_questions,shopping_questions):
+async def shopping_alg(main_questions,shopping_questions,max_places=12,min_places=8):
 
     loop = asyncio.get_running_loop()
     distance=main_questions.distance*1000
@@ -47,7 +47,6 @@ async def shopping_alg(main_questions,shopping_questions):
         for key in cat
     ]
 
-    
     
     helpers_enrich=[partial(getMallScore,keywords=EXTRA.get("mall")),
                     solve_photos]
@@ -79,7 +78,10 @@ async def shopping_alg(main_questions,shopping_questions):
             helpers_score,
             ratios,
             criteria_classification,
-            needs_normalization
+            needs_normalization,
+            0.5,
+            max_places,
+            min_places
             
         )
         cleaned_data[shopping_type]=loc_score_results
@@ -92,7 +94,7 @@ async def shopping_alg(main_questions,shopping_questions):
     }
 
 async def getMallScore(place,keywords):
-    display=place["displayName"]["text"]
+    display=place["display"]
     highlight=None
     inMall=1 if any(kw.lower() in display.lower() for kw in keywords) else 0
     
@@ -101,6 +103,7 @@ async def getMallScore(place,keywords):
         for detail in await asyncio.gather(*tasks):
             if "shopping_mall" in detail.get("types",[]):
                 inMall=1
+                print("avem in mallll")
                 break
     highlight="Locatia se afla intr un mall." if inMall==1 else "Locatia este stradala."
     return "inMall",inMall,highlight

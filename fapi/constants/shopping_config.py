@@ -21,6 +21,7 @@ ENRICHED={
     "priceLevel":    ("priceLevel",         ""),
     "latitude":      ("location.latitude",  None),
     "longitude":     ("location.longitude", None),
+    "containingPlaces": ("containingPlaces", []),
     "photos":       ("photos",             []),
     "openingHours":  ("regularOpeningHours", []),
     "reviews":("reviews",[]),
@@ -54,7 +55,7 @@ CATEGORY_CONFIG = {
         "text_query": ["book store", "vintage book store"],
         "excludedTypes": {"book_store": []},
         "textExcludedTypes": [],
-        "nearbyIncludedTypes": [],
+        "nearbyIncludedTypes": {},
         "textIncludedTypes": [],
         "bannedWordsNearby": [],
         "bannedWordsText": []
@@ -72,7 +73,7 @@ CATEGORY_CONFIG = {
     "Bijuterii": {
         "nearby_type": ["jewelry_store"],
         "text_query": ["jewelry store"],
-        "excludedTypes": {"jewelry_store": []},
+        "excludedTypes": {"jewelry_store": ["finance"]},
         "textExcludedTypes": [],
         "nearbyIncludedTypes": {},
         "textIncludedTypes": [],
@@ -94,7 +95,7 @@ CATEGORY_CONFIG = {
         "text_query": ["cosmetics store", "perfume store"],
         "excludedTypes": {},
         "textExcludedTypes": [],
-        "nearbyIncludedTypes": {},
+         "nearbyIncludedTypes": {},
         "textIncludedTypes": [],
         "bannedWordsNearby": [],
         "bannedWordsText": []
@@ -127,9 +128,9 @@ CATEGORY_CONFIG = {
         "bannedWordsNearby": [],
         "bannedWordsText": []
     },
-    "Alte locuri interesante": {
+    "default": {
         "nearby_type": ["shopping_mall"],
-        "text_query": ["local market"],
+        "text_query": [],
         "excludedTypes": {},
         "textExcludedTypes": [],
         "nearbyIncludedTypes": {},

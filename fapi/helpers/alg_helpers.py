@@ -171,15 +171,9 @@ async def enrich_place(place,extract,category_type,search_type,*args,
             enriched[var_name]=value
     
     print("\n")
-    
-    
-    print("tip principal",enriched["primaryType"])
-    print("price range",enriched["priceLevel"])
-    print("display:",enriched["display"])
-    print("tipuri: ",enriched["types"])
-    print("LiveMusic:",       enriched.get("liveMusic", ""))
-    print("Sports:",   enriched.get("sports", ""))
-    print("openingHours",enriched["openingHours"])
+    print("types:",enriched.get("types",[]))
+    print("primary type:",enriched.get("primaryType"))
+    print("display name:",enriched.get("display"))
     
     return enriched
 
@@ -265,12 +259,16 @@ async def enrich_all(raw_data,extract,extra_funcs,config):
             r for r in enriched
             if not isinstance(r, Exception)
         ]
+        for r in enriched:
+            if isinstance(r, Exception):
+                print("A apărut o eroare:", r)
+                break
 
-    
+
     return enriched_places
 
 
-def compute_score(cleaned_data,helpers,ratios,criteria_classification,needs_normalization,v=0.5,max_places=2,min_places=6):
+def compute_score(cleaned_data,helpers,ratios,criteria_classification,needs_normalization,v=0.5,max_places=12,min_places=8):
     if not cleaned_data:
         print("sal")
         return []
@@ -410,14 +408,14 @@ def compute_score(cleaned_data,helpers,ratios,criteria_classification,needs_norm
     final_cleaned_places.sort(key=lambda x: x["Q"])
     print("lungime final places:",len(final_cleaned_places))
     n=len(final_cleaned_places)
-    cutoff = math.ceil(n * 0.5) if math.ceil(n*0.5)<max_places else min_places
+    cutoff = math.ceil(n * 0.5) if math.ceil(n*0.5)>max_places else min_places
     top_locations=final_cleaned_places[:cutoff]
     print("lungime top locs places:",len(top_locations))
     return top_locations
 
 
 
-def location_restriction(latitude,longitude,distance):
+def location_restriction(latitude,longitude,distance=1200):
     circle=Circle(
         center=Center(
             latitude=latitude,

@@ -2,6 +2,8 @@ import asyncio
 import datetime
 import random
 from fapi.schemas import Circle,LocationRestriction,Center
+from fapi.helpers.itinerary_helpers import first_period
+from dateutil import parser
 async def itinerary_alg(main_questions, sec_q):
     
     loop = asyncio.get_running_loop()
@@ -21,7 +23,7 @@ async def itinerary_alg(main_questions, sec_q):
     end_day=sec_q.endDayType
     intensity=sec_q.intensity
     food_types=sec_q.foodTypes
-    
+    day=sec_q.day
     circle=Circle(
         center=Center(
             latitude=latitude,
@@ -30,20 +32,15 @@ async def itinerary_alg(main_questions, sec_q):
         radius=distance
     )
     loc_restr = LocationRestriction(circle=circle)
+    await first_period(day,budget, loc_restr, food_types, type_of_activity, intesity_activities, type_cultural, shopping, shopping_categories, intensity)
+
     yield {
         "stage": "final",
         "data": []
     }
     
 
-def period_morning(circle,intensity,included=False):
-    pass
 
-def period_launch(circle,intensity,included=False):
-    pass
-
-def period_afternoon(circle,intensity,included=True):
-    pass
 
 
 

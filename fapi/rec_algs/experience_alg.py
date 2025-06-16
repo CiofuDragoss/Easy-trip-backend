@@ -9,13 +9,16 @@ from functools import partial
 
 
 
-async def experience_alg(main_questions,secondary_questions):
+async def experience_alg(main_questions,secondary_questions,**kwargs):
+    nearby_excluded_types=kwargs.get("nearby_excluded_types", None)
+    max_places=kwargs.get("max_places",12)
+    min_places=kwargs.get("min_places",10)
+    kwargs.get("nearby_excluded_types", None)
     loop = asyncio.get_running_loop()
     distance=main_questions.distance*1000
     budget= main_questions.budget
     longitude= main_questions.region.longitude
     latitude= main_questions.region.latitude
-    adrenalineLvL=fix_Value(secondary_questions.adrenaline)
     indoor=fix_Value(secondary_questions.indoorOutdoor)
     physicalLvl=secondary_questions.physical
     try:
@@ -37,9 +40,10 @@ async def experience_alg(main_questions,secondary_questions):
       **CATEGORY_CONFIG["Experiente"]
     }]
 
-    remove_types(Types,indoor,wheater)
+    remove_types(Types,indoor,wheater,nearby_excluded_types)
 
-    
+    print("Types:", Types[0]["nearby_search_non_prim_types"])
+    print("Types main :", Types[0]["nearby_type"])
     yield {
         "stage": "pas 1",
         "info": "Cautam locatii din zona in care te afli..."
@@ -52,13 +56,13 @@ async def experience_alg(main_questions,secondary_questions):
             "info": "pregatim locatiile si le filtram..."
         }
     
-    ratios=[0.25,0.25,0.1,0.2,0.1,0.1]
-    criteria_classification=["+","+","+","+","-","+"]
-    needs_normalization=[False,False,False,False,True,False]
+    ratios=[0.3,0.3,0.15,0.15,0.1]
+    criteria_classification=["+","+","+","-","+"]
+    needs_normalization=[False,False,False,True,False]
 
     helpers_enrich=[
                     solve_photos]
-    helpers_score=[partial( score_adrenalin,adrenalineLvl=adrenalineLvL,map=EXTRA["type_config"]),
+    helpers_score=[
                    partial( score_phyisical,phyisical=physicalLvl,map=EXTRA["type_config"]),
                    partial( score_indoor,indoor=indoor,map=EXTRA["type_config"]),
         partial(rating_score,condition=3.6,z=1.4),
@@ -77,7 +81,9 @@ async def experience_alg(main_questions,secondary_questions):
             ratios,
             criteria_classification,
             needs_normalization,
-            0.7
+            0.8,
+            max_places,
+            min_places
             
         )
         cleaned_data[type]=loc_score_results
@@ -99,26 +105,7 @@ def fix_Value(option):
     else:
         return 0.5
 
-def score_adrenalin(place,adrenalineLvl,map):
-    highlight=None
-    query=place.get("search_QUERY","")
-    
-    if not query:
-        print("Nu am query la adrenaline")
-        raise Exception()
-    
-    adrenalinePlace=map.get(query,{}).get("adrenaline",None)
-    if adrenalinePlace is None:
-        print("Nu  adrenaline in andrelalineScore")
-        raise Exception()
-    
-    if adrenalinePlace>=0.7:
 
-        highlight="Locatie perfecta pentru distractie plina de adrenalina!"
-
-    adrenalinScore=gauss_score(adrenalinePlace,adrenalineLvl,sigma=0.3)
-
-    return "adrenalinScore",adrenalinScore,highlight
 
 def score_phyisical(place,phyisical,map):
     highlight=None
@@ -132,13 +119,15 @@ def score_phyisical(place,phyisical,map):
     if physicalPlace is None:
         print("Nu  pysical la pyshical score")
         raise Exception()
+    if physicalPlace<=0.3:
+        highlight="Locatia nu necesita activitate fizica!"
     
     if physicalPlace>=0.7:
 
-        highlight="Locatie perfecta pentru distractie plina de adrenalina!"
+        highlight="Locatia necesita un nivel fizic mai ridicat!"
 
     physicalScore=gauss_score(physicalPlace,phyisical,sigma=0.3)
-
+    
     return "physicalScore",physicalScore,highlight
 
 def score_indoor(place,indoor,map):
@@ -156,58 +145,73 @@ def score_indoor(place,indoor,map):
     
     if indoorPlace>=0.7:
 
-        highlight="Locatie perfecta pentru distractie plina de adrenalina!"
+        highlight="Locatie este indoor!"
 
     indoorScore=gauss_score(indoorPlace,indoor,sigma=0.3)
 
     return "indoorScore",indoorScore,highlight
 
 
-def remove_types(Types,indoor,wheater):
+def remove_types(Types,indoor,wheater,banned_types):
 
     to_remove=[]
     map=EXTRA["type_config"]
 
     is_day=wheater.get("is_day")
     temp=wheater.get("temp")
+    print("asta e temp",temp)
     max_temp=wheater.get("max_temp")
+    print("asta e max_temp",max_temp)
     types=Types[0]
-    for type in types["nearby_search_non_prim_types"]:
+    for type in types["nearby_search_non_prim_types"]+types["nearby_type"]:
+        print("tipul este : ",type)
         
         indoor_of_type=map.get(type).get("indoor")
-        needs_wheater=map.get(type).get("needs_wheater",None)
-
+        needs_weather=map.get(type).get("needs_weather",None)
+        print("needs_wheater",needs_weather)
         if indoor==1 and indoor_of_type==0:
             to_remove.append(type)
-        
+            
         elif indoor==0 and indoor_of_type==1:
 
             to_remove.append(type)
-
-        if needs_wheater is not None and needs_wheater==0 :
-
+           
+        if needs_weather is not None and needs_weather==0 :
+           
             if is_day and temp>8:
-
+                print("sunt aici",type)
                 to_remove.append(type)
-
+                
             elif not is_day and max_temp>8:
 
                 to_remove.append(type)
-
-        elif needs_wheater is not None and needs_wheater==1 :
-
+                
+            
+        elif needs_weather is not None and needs_weather==1 :
+            
             if is_day and temp<23:
-
+                print("sunt aiciiii",type)
                 to_remove.append(type)
+                
 
             elif not is_day and max_temp<23:
 
                 to_remove.append(type)
-
+                
+    if banned_types:
+        to_remove.append(type)
     lst = types["nearby_search_non_prim_types"]
     types["nearby_search_non_prim_types"][:] = [
         t for t in lst if t not in to_remove
     ]
+
+    lst = types["nearby_type"]
+    types["nearby_type"][:] = [
+        t for t in lst if t not in to_remove
+    ]
+
+    
+
 
 
 

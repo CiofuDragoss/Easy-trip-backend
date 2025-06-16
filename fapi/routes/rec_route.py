@@ -13,6 +13,7 @@ from fapi.helpers.bd_rec_save import save_recs,get_recs
 from fapi.rec_algs.nightlife_alg import nightlife_alg
 from fapi.rec_algs.itinerary_alg import itinerary_alg
 import json
+from pprint import pprint
 router=APIRouter()
 
 ALG_MAP = {
@@ -68,7 +69,7 @@ async def Process_Request(websocket:WebSocket):
                 #pprint(filtered_data, sort_dicts=False)
                 
 
-
+            
             await websocket.send_json(update)
 
             if update.get("data",""):

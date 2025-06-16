@@ -6,7 +6,9 @@ from fapi.helpers.alg_helpers import fetch_places,enrich_all,compute_score,price
 from fapi.helpers.math_helpers import gauss_score
 from functools import partial
 from pprint import pprint
-async def history_alg(main_questions,secondary_questions):
+async def history_alg(main_questions,secondary_questions,**kwargs):
+    max_places=kwargs.get("max_places",12)
+    min_places=kwargs.get("min_places",10)
     loop = asyncio.get_running_loop()
     distance=main_questions.distance*1000
     budget= main_questions.budget
@@ -31,6 +33,16 @@ async def history_alg(main_questions,secondary_questions):
         for key in location_types
     ]
 
+    for type in historyTypes:
+        if type.get("key")=="Muzee":
+            if experience_type>0.75:
+                type["text_query"]=["art museum"]
+            elif experience_type<0.25:
+                type["text_query"]=["history museum"]
+
+            break
+
+
     yield {
         "stage": "pas 1",
         "info": "Cautam locatii din zona in care te afli..."
@@ -43,7 +55,7 @@ async def history_alg(main_questions,secondary_questions):
             "info": "pregatim locatiile si le filtram..."
         }
     
-    ratios=[0.35,0.35,0.2,0.1]
+    ratios=[0.35,0.2,0.2,0.1]
     criteria_classification=["+","+","-","+"]
     needs_normalization=[False,False,True,False]
 
@@ -66,7 +78,9 @@ async def history_alg(main_questions,secondary_questions):
             ratios,
             criteria_classification,
             needs_normalization,
-            0.7
+            0.5,
+            max_places,
+            min_places
             
         )
         cleaned_data[history_type]=loc_score_results
@@ -83,9 +97,7 @@ def history_score_corr(place,exp_type,score_map):
     score_map=score_map
     highlight=None
     query=place.get("search_QUERY","")
-    print("nume:",place.get("display"))
-    print("asta e queryy:",query)
-    print("types:",place.get("types"))
+    types=place.get("types",[])
     if not query:
         print("buna din query")
         raise Exception()
@@ -99,7 +111,8 @@ def history_score_corr(place,exp_type,score_map):
         highlight="Locatia aceasta ofera o experienta culturala si istorica importanta!"
     
     base_score=gauss_score(score,exp_type,sigma=0.3)
-
+    if "tourist_attraction" in types:
+        base_score=base_score*1.1
     if not base_score:
         print("sal din base score")
         raise Exception()

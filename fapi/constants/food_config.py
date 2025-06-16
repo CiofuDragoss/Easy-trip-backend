@@ -230,7 +230,19 @@ CATEGORY_CONFIG = {
         "textIncludedTypes": [],
         "bannedWordsNearby": [],
         "bannedWordsText": []
-    }
+    },
+    "default": {
+        "nearby_type": ["restaurant"],
+        "nearby_search_non_prim_types": [],
+        "nearbyExcludedPrimaryTypes":[],
+        "text_query": [],
+        "excludedTypes": {},
+        "textExcludedTypes": [],
+        "nearbyIncludedTypes": {},
+        "textIncludedTypes": [],
+        "bannedWordsNearby": [],
+        "bannedWordsText": []
+    },
     
     
 }
