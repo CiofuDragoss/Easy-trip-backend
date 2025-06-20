@@ -68,7 +68,7 @@ CATEGORY_CONFIG_RELAX = {
         "bannedWordsText": []
     },
     "Gustare dulce": {
-        "nearby_type": ["dessert_shop","confectionery","donut_shop","dessert_shop"],
+        "nearby_type": ["dessert_shop","confectionery","donut_shop"],
         "nearby_search_non_prim_types": ["dessert_restaurant"],
         "nearbyExcludedPrimaryTypes": [],
         "text_query": [],
@@ -105,6 +105,19 @@ CATEGORY_CONFIG_RELAX = {
     },
     "Parc": {
         "nearby_type": ["park"],
+        "nearby_search_non_prim_types": [],
+        "nearbyExcludedPrimaryTypes": [],
+        "text_query": [],
+        "excludedTypes": {},
+        "textExcludedTypes": [],
+        "nearbyIncludedTypes": {},
+        "textIncludedTypes": [],
+        "bannedWordsNearby": [],
+        "bannedWordsText": []
+    },
+
+    "default":{
+        "nearby_type": ["park","cafe","sandwich_shop","donut_shop","confectionery"],
         "nearby_search_non_prim_types": [],
         "nearbyExcludedPrimaryTypes": [],
         "text_query": [],

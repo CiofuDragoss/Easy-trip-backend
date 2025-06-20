@@ -12,36 +12,64 @@ from datetime import timedelta
 import asyncio
 from fapi.constants.Itinerary_config import CATEGORY_CONFIG_RELAX,EXTRA_RELAX,ENRICHED_RELAX
 from functools import partial
-async def first_period(day,budget,init_loc_restr,food_types,type_of_activity,intesity_activities, type_cultural,shopping, shopping_categories,intensity,wants_break,break_type,break_day_time,included=False):
+async def first_period(day,budget,init_loc_restr,food_types,type_of_activity,intensity_activities, type_cultural,shopping, shopping_categories,intensity,wants_break,break_type,break_day_time,included=False):
+    print("tipe cultural:",type_cultural)
+    if not included:
+        return {}
     final_first_period={}
     time=220+100*intensity
     start_hour=9
-    main_q_food={
-        "distance":900,
-        "budget":budget,
-        "region":{
-            "latitude": init_loc_restr.circle.center.latitude,
-            "longitude": init_loc_restr.circle.center.longitude
-        }
-
-    }
 
     food_place= await best_food_place(init_loc_restr,food_types,"Mic-dejun",budget,day,start_hour,intensity)
-    final_first_period[f"Incepeti ziua cu micul dejun la {food_place.get("display")}"]=[food_place]
-    duration_food_walk=calculate_walking_speed(food_place,intensity)
-    breakfast_duration=50-13*intensity
-    time-=(breakfast_duration+duration_food_walk)
+    duration_walk=calculate_walking_speed(food_place,intensity)
+    activity_duration=50-13*intensity
+    final_first_period[f"Incepeti ziua cu micul dejun la {food_place.get('display')}.Aveti de mers {duration_walk} de la locatia dumneavostra. Merita!"]=[food_place]
+    time-=(activity_duration+duration_walk)
 
-    start_hour+=round((breakfast_duration+duration_food_walk)/60)
+    start_hour+=round((activity_duration+duration_walk)/60)
     print("intensity",intensity)
     print("asta e ora",start_hour)
     print("time dupa mancare",time)
-    first_activ=True
-    while time:
-        if first_activ and wants_break:
-            pass
+
+    init_loc_restr=get_new_restriction(food_place)
+    first_activ=False
+    while time>0:
+        if first_activ and wants_break and break_day_time=="In prima parte a zilei":
+            break_place= await call_break(init_loc_restr,break_type,budget,day,start_hour)
+            duration_walk=calculate_walking_speed(break_place,intensity)
+            activity_duration=50-20*intensity
+            time-=(activity_duration+duration_walk)
+            start_hour+=round((activity_duration+duration_walk)/60)
+            init_loc_restr=get_new_restriction(break_place)
+            final_first_period[f"Faceti o pauza de {break_type} la {break_place.get('display')}. Dureaza aproximativ {duration_walk} minute sa ajungeti."]=[break_place]
+            wants_break=False
         elif first_activ and shopping:
+
             shopping_place=await best_shopping(budget,intensity,init_loc_restr,shopping_categories,day,start_hour)
+            duration_walk=calculate_walking_speed(shopping_place,intensity)
+            activity_duration=50-20*intensity
+            time-=(activity_duration+duration_walk)
+            start_hour+=round((activity_duration+duration_walk)/60)
+            init_loc_restr=get_new_restriction(shopping_place)
+            final_first_period[f"Veti gasi cele mai bune produse din categoria {shopping_place.get('category_type')} la  {shopping_place.get('display')}.Dureaza {duration_walk} sa ajungeti."]=[shopping_place]
+            shopping=False
+        activity_place=await best_experience_cultural(init_loc_restr,type_of_activity,type_cultural,budget,day,start_hour,intensity_activities,intensity)
+        duration_walk=calculate_walking_speed(activity_place,intensity)
+        activity_duration=activity_place.get("duration",70)-(activity_place.get("duration",70)/(1/10))*intensity if activity_place.get('place_type_cat')=="experience" else 65-25*intensity
+        time-=(activity_duration+duration_walk)
+        start_hour+=round((activity_duration+duration_walk)/60)
+        init_loc_restr=get_new_restriction(activity_place)
+        if not first_activ:
+            key=f"Dupa ce terminati de servit micul-dejun, vizitati {activity_place.get('display')}, veti invata multe si veti avea parte de o experienta culturala de neuitat.Dureaza {duration_walk} sa ajungeti." if activity_place.get("place_type_cat")=="cultural" else f"Dupa ce terminati de servit micul-dejun, incepeti programul cu o experienta placuta la {activity_place.get('display')}.Dureaza {duration_walk} sa ajungeti."
+        else:
+            key=f"Continuati programul vizitand {activity_place.get('display')}.Bucurati-va de experienta culturala oferita de locatie.Dureaza {duration_walk} sa ajungeti." if activity_place.get("place_type_cat")=="cultural" else f"Continuati programul cu o experienta placuta la {activity_place.get('display')}.Dureaza {duration_walk} sa ajungeti."
+        final_first_period[key]=[activity_place]
+        first_activ=True
+    return final_first_period
+
+
+
+
 
 
 
@@ -66,9 +94,33 @@ def create_food_sec_questions(food_types,meal_type):
 
     return sec_questions
 
+async def call_break(loc_restr,break_type,budget,day,hour):
 
+    sorted_places=[]
+    iters=0
+    while not sorted_places and iters<4:
+        iters+=1
+        places=await break_alg(loc_restr,break_type,budget)
+        all_places = [place for places in places.values() for place in places]
+
+
+        sorted_places = sorted(all_places, key=lambda x: x["Q"])[:6]
+        sorted_places = [
+        place for place in sorted_places
+        if is_open(place, day, hour,offset=2)
+    ]
+        loc_restr.circle.radius+=0.2
+        break_type="default"
+
+    if not sorted_places:
+        raise Exception()
+    best_place = min(sorted_places, key=lambda x: x["distance"])
+    return best_place
+
+    
+        
 async def break_alg(loc_restr,break_type,budget):
-    loop=asyncio
+    loop=asyncio.get_running_loop()
     type = [
         {
       "key": break_type,
@@ -138,8 +190,10 @@ async def  best_food_place(init_loc_restr,food_types,meal_type,budget,day,hour,i
     main_q_food = MainQuestions.model_validate(main_q_food)
 
     sorted_food_places=[]
+    food_places={}
     iters=0
     while not sorted_food_places and iters<5:
+        print("sorted food lungime:", sorted_food_places)
         iters+=1
         print("salut din while")
         async for update in food_alg(main_q_food, sec_q_food):
@@ -154,10 +208,12 @@ async def  best_food_place(init_loc_restr,food_types,meal_type,budget,day,hour,i
 
 
         sorted_food_places = sorted(all_food_places, key=lambda x: x["Q"])[:6]
+        print("lungime in interiorul while inainte de sort :",len(sorted_food_places))
         sorted_food_places = [
         place for place in sorted_food_places
         if is_open(place, day, hour,offset=2)
     ]
+        
 
         main_q_food.distance += 0.2 
         if "default" not in sec_q_food.foodTypes:
@@ -177,7 +233,7 @@ async def  best_food_place(init_loc_restr,food_types,meal_type,budget,day,hour,i
 def is_open(place, day, hour,offset=2):
     min_open_time = hour
     min_close_time = hour + offset
-
+    print("ora este :",hour)
     # ajustare dacă ora depășește 24
     if min_close_time >= 24:
         min_close_time -= 24
@@ -210,12 +266,13 @@ def is_open(place, day, hour,offset=2):
             if (day == open_day and open_hour <= min_open_time) or \
                (day == next_day and close_hour >= min_close_time):
                 return True
-
+    print("am eliminat in is open")
     return False
 
-def get_new_restriction(place):
+def get_new_restriction(place,radius=1000):
     latitude = place.get("latitude")
     longitude = place.get("longitude")
+    return location_restriction(latitude,longitude,distance=radius)
     
 
 async def best_experience_cultural(init_loc_restr,type_of_activity,type_cultural,budget,day,hour,intensity_activities,intensity):
@@ -275,6 +332,7 @@ async def best_experience_cultural(init_loc_restr,type_of_activity,type_cultural
         main_q.distance += 0.2 
 
     best_place = min(sorted_places, key=lambda x: x["distance"])
+    best_place["place_type_cat"]="cultural" if cultural else "experience"
     return best_place
 
 
@@ -299,8 +357,9 @@ async def best_shopping(budget,intensity,init_loc_restr,shopping_categories,day,
     }
 
     main_q = MainQuestions.model_validate(main_q)
-    sec_q = SecondaryQuestions.model_validate(sec_q)
+    sec_q = SecondaryQuestions.model_validate(seq_q)
     sorted_places=[]
+    places_ec={}
     async for update in shopping_alg(main_q, sec_q):
         if any(update.get("data", {}).values()):
             places_ec = update["data"]

@@ -170,10 +170,10 @@ async def enrich_place(place,extract,category_type,search_type,*args,
             
             enriched[var_name]=value
     
-    print("\n")
+    """print("\n")
     print("types:",enriched.get("types",[]))
     print("primary type:",enriched.get("primaryType"))
-    print("display name:",enriched.get("display"))
+    print("display name:",enriched.get("display"))"""
     
     return enriched
 
@@ -421,7 +421,7 @@ def location_restriction(latitude,longitude,distance=1200):
             latitude=latitude,
             longitude=longitude
         ),
-        radius=distance
+        radius=int(distance)
     )
     loc_restr = LocationRestriction(circle=circle)
 

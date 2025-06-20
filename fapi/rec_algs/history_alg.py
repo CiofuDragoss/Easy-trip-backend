@@ -10,7 +10,7 @@ async def history_alg(main_questions,secondary_questions,**kwargs):
     max_places=kwargs.get("max_places",12)
     min_places=kwargs.get("min_places",10)
     loop = asyncio.get_running_loop()
-    distance=main_questions.distance*1000
+    distance=int(main_questions.distance*1000)
     budget= main_questions.budget
     longitude= main_questions.region.longitude
     latitude= main_questions.region.latitude

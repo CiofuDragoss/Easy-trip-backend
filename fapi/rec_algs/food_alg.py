@@ -10,7 +10,7 @@ from functools import partial
 from pprint import pprint
 async def food_alg(main_questions,secondary_questions,condition=1500):
     loop = asyncio.get_running_loop()
-    distance=main_questions.distance*1000
+    distance=int(main_questions.distance*1000)
     budget= main_questions.budget
     longitude= main_questions.region.longitude
     latitude= main_questions.region.latitude

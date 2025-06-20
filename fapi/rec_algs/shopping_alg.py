@@ -25,7 +25,7 @@ from functools import partial
 async def shopping_alg(main_questions,shopping_questions,max_places=12,min_places=8):
 
     loop = asyncio.get_running_loop()
-    distance=main_questions.distance*1000
+    distance=int(main_questions.distance*1000)
     budget= main_questions.budget
     longitude= main_questions.region.longitude
     latitude= main_questions.region.latitude

@@ -15,7 +15,7 @@ async def experience_alg(main_questions,secondary_questions,**kwargs):
     min_places=kwargs.get("min_places",10)
     kwargs.get("nearby_excluded_types", None)
     loop = asyncio.get_running_loop()
-    distance=main_questions.distance*1000
+    distance=int(main_questions.distance*1000)
     budget= main_questions.budget
     longitude= main_questions.region.longitude
     latitude= main_questions.region.latitude
@@ -60,7 +60,7 @@ async def experience_alg(main_questions,secondary_questions,**kwargs):
     criteria_classification=["+","+","+","-","+"]
     needs_normalization=[False,False,False,True,False]
 
-    helpers_enrich=[
+    helpers_enrich=[partial(enrich_duration,map=EXTRA["type_config"]),
                     solve_photos]
     helpers_score=[
                    partial( score_phyisical,phyisical=physicalLvl,map=EXTRA["type_config"]),
@@ -150,6 +150,21 @@ def score_indoor(place,indoor,map):
     indoorScore=gauss_score(indoorPlace,indoor,sigma=0.3)
 
     return "indoorScore",indoorScore,highlight
+
+def enrich_duration(place,map):
+    query=place.get("search_QUERY","")
+    duration=60
+    if not query:
+        print("Nu am query la duration")
+        raise Exception()
+    
+    indoorPlace=map.get(query,{}).get("duration",None)
+    if indoorPlace is None:
+        print("Nu  durationPlace in duration")
+        raise Exception()
+    
+    return "duration",duration,None
+    
 
 
 def remove_types(Types,indoor,wheater,banned_types):
