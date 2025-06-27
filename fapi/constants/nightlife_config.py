@@ -45,8 +45,8 @@ CATEGORY_CONFIG={
         "textExcludedTypes": [],
         "nearbyIncludedTypes": {},
         "textIncludedTypes": ["pub","bar"],
-        "bannedWordsNearby": [],
-        "bannedWordsText": []
+        "bannedWordsNearby": ["gentlemen","strip"],
+        "bannedWordsText": ["gentlemen","strip"]
     },
     "Karaoke": {
         "nearby_type": [],
@@ -57,8 +57,8 @@ CATEGORY_CONFIG={
         "textExcludedTypes": [],
         "nearbyIncludedTypes": {"karaoke":["bar","night_club"]},
         "textIncludedTypes": ["karaoke","bar"],
-        "bannedWordsNearby": [],
-        "bannedWordsText": []
+        "bannedWordsNearby": ["gentlemen","strip"],
+        "bannedWordsText": ["gentlemen","strip"]
     },
     "Lounge": {
         "nearby_type": ["night_club","bar"],
@@ -69,8 +69,8 @@ CATEGORY_CONFIG={
         "textExcludedTypes": [],
         "nearbyIncludedTypes": {},
         "textIncludedTypes": [],
-        "bannedWordsNearby": [],
-        "bannedWordsText": []
+        "bannedWordsNearby": ["gentlemen","strip"],
+        "bannedWordsText": ["gentlemen","strip"]
     },
     "Bar de noapte": {
         "nearby_type": ["night_club","bar"],

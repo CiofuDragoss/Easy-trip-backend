@@ -53,11 +53,11 @@ EXTRA={
 CATEGORY_CONFIG = {
     
     "Cafenea": {
-        "nearby_type": [],
-        "nearby_search_non_prim_types": ["cafe","cat_cafe","dog_cafe"],
+        "nearby_type": ["cafe"],
+        "nearby_search_non_prim_types": ["cafe","coffe_shop"],
         "nearbyExcludedPrimaryTypes":["supermarket"],
         "text_query": [],
-        "excludedTypes": {},
+        "excludedTypes": {"cafe":["playground","fast_food_restaurant"],"coffe_shop":["playground","fast_food_restaurant"]},
         "textExcludedTypes": [],
         "nearbyIncludedTypes": {},
         "textIncludedTypes": [],
@@ -66,10 +66,10 @@ CATEGORY_CONFIG = {
     },
     "Bar": {
         "nearby_type": ["bar"],
-        "nearby_search_non_prim_types": [],
+        "nearby_search_non_prim_types": ["bar"],
         "nearbyExcludedPrimaryTypes":[],
         "text_query": [],
-        "excludedTypes": {},
+        "excludedTypes": {"bar":['barbecue_area','hotel','playground']},
         "textExcludedTypes": [],
         "nearbyIncludedTypes": {},
         "textIncludedTypes": [],
@@ -77,7 +77,7 @@ CATEGORY_CONFIG = {
         "bannedWordsText": []
     },
     "Pub": {
-        "nearby_type": [],
+        "nearby_type": ["pub"],
         "nearby_search_non_prim_types": ["pub"],
         "nearbyExcludedPrimaryTypes":[],
         "text_query": [],
@@ -121,7 +121,12 @@ CATEGORY_CONFIG = {
         "nearby_search_non_prim_types": ["confectionery","dessert_restaurant","donut_shop","candy_store"],
         "nearbyExcludedPrimaryTypes":["italian_restaurant","pizza_restaurant"],
         "text_query": [],
-        "excludedTypes": {},
+        "excludedTypes": {
+            "confectionery": ["fast_food_restaurant", "hamburger_restaurant"],
+            "dessert_restaurant": ["fast_food_restaurant", "hamburger_restaurant"],
+            "donut_shop": ["fast_food_restaurant", "hamburger_restaurant"],
+            "candy_store": ["fast_food_restaurant", "hamburger_restaurant"]
+        },
         "textExcludedTypes": [],
         "nearbyIncludedTypes": {},
         "textIncludedTypes": [],
@@ -145,9 +150,9 @@ CATEGORY_CONFIG = {
     "Gelaterie": {
         "nearby_type": [],
         "nearby_search_non_prim_types": ["ice_cream_shop"],
-        "nearbyExcludedPrimaryTypes":["pizza_shop"],
+        "nearbyExcludedPrimaryTypes":["pizza_shop","food_delivery","fast_food_restaurant"],
         "text_query": [],
-        "excludedTypes": {},
+        "excludedTypes": {"ice_cream_shop":{"food_delivery"}},
         "textExcludedTypes": [],
         "nearbyIncludedTypes": {},
         "textIncludedTypes": [],

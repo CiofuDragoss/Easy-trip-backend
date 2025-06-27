@@ -35,5 +35,8 @@ class Settings:
     google_weather_api:str=os.getenv(
         "GOOGLE_WEATHER_URL",""
     )
+    google_geocoding_api:str=os.getenv(
+        "GOOGLE_GEOCODING_URL",""
+    )
 
 settings = Settings()

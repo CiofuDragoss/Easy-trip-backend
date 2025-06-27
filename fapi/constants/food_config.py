@@ -52,6 +52,7 @@ CATEGORY_CONFIG = {
         "nearby_type": [],
         "nearby_search_non_prim_types": ["vietnamese_restaurant","chinese_restaurant","korean_restaurant"],
         "text_query": [],
+        "nearbyExcludedPrimaryTypes":["meal_delivery","catering_service"],
         "excludedTypes": {"vietnamese_restaurant":["pizza_restaurant","hamburger_restaurant"],"chinese_restaurant":["pizza_restaurant","hamburger_restaurant"],"korean_restaurant":["pizza_restaurant","hamburger_restaurant"]},
         "textExcludedTypes": [],
         "nearbyIncludedTypes": {},
@@ -220,20 +221,10 @@ CATEGORY_CONFIG = {
         "bannedWordsText": []
     },
     
-    "Surprinde-ma":{
-        "nearby_type": [],
-        "nearby_search_non_prim_types": [],
-        "text_query": [],
-        "excludedTypes": {},
-        "textExcludedTypes": [],
-        "nearbyIncludedTypes": {},
-        "textIncludedTypes": [],
-        "bannedWordsNearby": [],
-        "bannedWordsText": []
-    },
+   
     "default": {
         "nearby_type": ["restaurant"],
-        "nearby_search_non_prim_types": [],
+        "nearby_search_non_prim_types": ["restaurant"],
         "nearbyExcludedPrimaryTypes":[],
         "text_query": [],
         "excludedTypes": {},

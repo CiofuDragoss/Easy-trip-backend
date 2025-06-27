@@ -52,6 +52,7 @@ EXTRA={
 CATEGORY_CONFIG = {
     "Librarii": {
         "nearby_type": ["book_store"],
+        "nearby_search_non_prim_types": [],
         "text_query": ["book store", "vintage book store"],
         "excludedTypes": {"book_store": []},
         "textExcludedTypes": [],
@@ -61,19 +62,22 @@ CATEGORY_CONFIG = {
         "bannedWordsText": []
     },
     "Souveniruri & Cadouri": {
-        "nearby_type": ["gift_shop"],
-        "text_query": ["souvenirs", "traditional gifts"],
-        "excludedTypes": {},
+        "nearby_type": [],
+        "nearby_search_non_prim_types": [],
+        "text_query": ["souvenirs", "local gifts","traditional gifts"],
+        "excludedTypes": {"gift_shop": []},
         "textExcludedTypes": ["supermarket"],
         "nearbyIncludedTypes": {},
         "textIncludedTypes": [],
-        "bannedWordsNearby": ["online","print"],
-        "bannedWordsText": ["online","print"]
+        "bannedWordsNearby": ["online", "print"],
+        "bannedWordsText": ["online", "print"]
     },
     "Bijuterii": {
         "nearby_type": ["jewelry_store"],
-        "text_query": ["jewelry store"],
-        "excludedTypes": {"jewelry_store": ["finance"]},
+        "nearby_search_non_prim_types": ["jewelry_store"],
+        "nearbyExcludedPrimaryTypes":["finance"],
+        "text_query": [],
+        "excludedTypes": {"jewelry_store": []},
         "textExcludedTypes": [],
         "nearbyIncludedTypes": {},
         "textIncludedTypes": [],
@@ -82,37 +86,37 @@ CATEGORY_CONFIG = {
     },
     "Moda si accesorii": {
         "nearby_type": ["clothing_store", "shoe_store"],
-        "text_query": ["clothing store", "fashion accessories", "footwear store"],
-        "excludedTypes": {"clothing_store": [], "shoe_store": []},
-        "textExcludedTypes": ["jewelry_store"],
+        "nearby_search_non_prim_types": [],
+        "nearbyExcludedPrimaryTypes":[],
+        "text_query": ["fashion accessories"],
+        "excludedTypes": {"clothing_store": ["child_care_agency","tailor","gift_shop","wedding_venue"], "shoe_store": ["child_care_agency","tailor","gift_shop","wedding_venue"]},
+        "textExcludedTypes": [],
         "nearbyIncludedTypes": {},
-        "textIncludedTypes": [],
+        "textIncludedTypes": ["clothing_store"],
         "bannedWordsNearby": [],
         "bannedWordsText": []
     },
     "Cosmetice si parfumuri": {
         "nearby_type": [],
+        "nearby_search_non_prim_types": [],
         "text_query": ["cosmetics store", "perfume store"],
         "excludedTypes": {},
         "textExcludedTypes": [],
-         "nearbyIncludedTypes": {},
+        "nearbyIncludedTypes": {},
         "textIncludedTypes": [],
         "bannedWordsNearby": [],
         "bannedWordsText": []
     },
     "Antichitati": {
         "nearby_type": [],
+        "nearby_search_non_prim_types": [],
         "text_query": ["antique store"],
         "excludedTypes": {},
         "textExcludedTypes": [],
         "nearbyIncludedTypes": {},
         "textIncludedTypes": [
-            "art_gallery",
-            "jewelry_store",
-            "home_goods_store",
-            "furniture_store",
-            "book_store",
-            "discount_store",
+            "art_gallery", "jewelry_store", "home_goods_store",
+            "furniture_store", "book_store", "discount_store",
             "home_improvement_store"
         ],
         "bannedWordsNearby": [],
@@ -120,16 +124,20 @@ CATEGORY_CONFIG = {
     },
     "Produse locale": {
         "nearby_type": [],
-        "text_query": ["traditional store", "traditional food store"],
+        "nearby_search_non_prim_types": [],
+        "text_query": ["traditional store","traditional shop"],
         "excludedTypes": {},
-        "textExcludedTypes": [],
+        "textExcludedTypes": ["fast_food_restaurant","pub","bar","restaurant"],
         "nearbyIncludedTypes": {},
         "textIncludedTypes": [],
         "bannedWordsNearby": [],
         "bannedWordsText": []
     },
+    
+    
     "default": {
         "nearby_type": ["shopping_mall"],
+        "nearby_search_non_prim_types": [],
         "text_query": [],
         "excludedTypes": {},
         "textExcludedTypes": [],

@@ -117,7 +117,7 @@ CATEGORY_CONFIG_RELAX = {
     },
 
     "default":{
-        "nearby_type": ["park","cafe","sandwich_shop","donut_shop","confectionery"],
+        "nearby_type": ["park","cafe","sandwich_shop","donut_shop","confectionery","ice_cream_shop","bar"],
         "nearby_search_non_prim_types": [],
         "nearbyExcludedPrimaryTypes": [],
         "text_query": [],

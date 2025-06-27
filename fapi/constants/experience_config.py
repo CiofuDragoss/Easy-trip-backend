@@ -42,14 +42,13 @@ EXTRA = {
     "duration":180,
   },
   "botanical_garden": {
-    "indoor": 0.3,
+    "indoor": 0,
     "physical": 0.2,
     "duration":60,
   },
   "bowling_alley": {
     "indoor": 1,
     "physical": 0.2,
-    "needs_weather": 0,
     "duration":95,
   },
   "swimming_pool": {
@@ -64,11 +63,6 @@ EXTRA = {
     "needs_weather": 0,
     "duration":180,
   },
-  "plaza": {
-    "indoor": 0,
-    "physical": 0.1,
-    "duration":70,
-  },
   "beach": {
     "indoor": 0,
     "physical": 0.3,
@@ -76,7 +70,7 @@ EXTRA = {
     "duration":155,
   },
   "zoo": {
-    "indoor": 0.5,
+    "indoor": 0.2,
     "physical": 0.1,
     "duration":95,
   },
@@ -106,6 +100,21 @@ EXTRA = {
     "indoor": 0,
     "physical": 0.2,
     "duration":45,
+  },
+  "planetarium":{
+    "indoor": 1,
+    "physical": 0,
+    "duration":55,
+  },
+  "comedy_club":{
+    "indoor": 1,
+    "physical": 0,
+    "duration":55,
+  },
+  "circus":{
+    "indoor": 1,
+    "physical": 0,
+    "duration":90,
   }
 },
     "Mask": [
@@ -134,7 +143,8 @@ CATEGORY_CONFIG = {
             "botanical_garden", 
             "bowling_alley",
             "ski_resort",
-            "plaza",
+            "comedy_club",
+            "planetarium",
             "beach",
             "zoo",
             "water_park",
@@ -142,10 +152,10 @@ CATEGORY_CONFIG = {
             "adventure_sports_center",
             "observation_deck"
         ],
-        "text_query": [],
-        "excludedTypes": {"swimming_pool":["sports_activity_location"],'tourist_attraction':["casino"]},
-        "textExcludedTypes": [],
-        "nearbyIncludedTypes": {},
+        "text_query": ["circus"],
+        "excludedTypes": {"swimming_pool":["sports_activity_location"],'tourist_attraction':["casino","restaurant","monument","sculpture"],"park":["playground","dog_park"],"zoo":['amusement_center','amusement_park'],"observation_deck":["food_delivery","general_contractor"],"adventure_sports_center":{'tour_agency', 'travel_agency','real_estate_agency','childrens_camp','school', 'summer_camp_organizer'},"hiking_area":{'tour_agency', 'travel_agency','real_estate_agency','childrens_camp','school', 'summer_camp_organizer'}},
+        "textExcludedTypes": ["sports_club","child_care_agency","school","restaurant"],
+        "nearbyIncludedTypes": {"park":['tourist_attraction']},
         "textIncludedTypes": [],
         "bannedWordsNearby": [],
         "bannedWordsText": []

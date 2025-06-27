@@ -1,6 +1,7 @@
-from pydantic import BaseModel, EmailStr,ConfigDict
-
-
+from pydantic import BaseModel, EmailStr,ConfigDict,Field
+from beanie import PydanticObjectId
+from datetime import datetime
+from typing import Optional,Literal
 class SecondaryQuestions(BaseModel):
     model_config = ConfigDict(extra='allow')
 
@@ -36,6 +37,31 @@ class MainQuestions(BaseModel):
     distance:float
     region: Region
 
+class RecommendationDetail(BaseModel):
+    id: PydanticObjectId = Field(..., alias="_id")
+    type: str
+    data: dict
+    created_at: datetime
+    location: Optional[str]
+
+    model_config = ConfigDict(
+        validate_by_name=True,
+        
+        json_encoders={PydanticObjectId: str},
+    )
+
+
+class RecommendationMeta(BaseModel):
+    id: PydanticObjectId = Field(..., alias="_id")
+    type: str
+    created_at: datetime
+    location: Optional[str]
+
+    model_config = ConfigDict(
+        validate_by_name=True,
+        json_encoders={PydanticObjectId: str},
+    )
+
 class ShoppingRequest(BaseModel):
     MainQuestions: MainQuestions
     ShoppingQuestions: Shopping
@@ -69,7 +95,9 @@ class NearbySearch(BaseModel):
         "places.userRatingCount",
         "places.priceLevel",
         ]
-
+class TogglePayload(BaseModel):
+    place_id: str
+    add: bool
 class TextSearch(BaseModel):
     textQuery: str
     locationBias:LocationRestriction

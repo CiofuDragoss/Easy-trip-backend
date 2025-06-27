@@ -61,7 +61,7 @@ CATEGORY_CONFIG = {
         "bannedWordsText": []
     },
     "Galerii de arta": {
-        "nearby_type": ["art_gallery","art_studio"],
+        "nearby_type": ["art_gallery"],
         "text_query": ["art gallery","art expo"],
         "excludedTypes": {"art_gallery":[]},
         "textExcludedTypes": [],

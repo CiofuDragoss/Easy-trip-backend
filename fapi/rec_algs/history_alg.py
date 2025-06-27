@@ -2,28 +2,28 @@ import asyncio
 from fapi.constants.executors import DEFAULT_THREAD_POOL,DEFAULT_PROCESS_POOL
 from fapi.schemas import LocationRestriction,Circle,Center
 from fapi.constants.history_config import CATEGORY_CONFIG,EXTRA,ENRICHED
-from fapi.helpers.alg_helpers import fetch_places,enrich_all,compute_score,price_score,dist,rating_score,solve_photos
+from fapi.helpers.alg_helpers import fetch_places,enrich_all,compute_score,price_score,dist,rating_score,solve_photos,location_restriction
 from fapi.helpers.math_helpers import gauss_score
 from functools import partial
 from pprint import pprint
 async def history_alg(main_questions,secondary_questions,**kwargs):
-    max_places=kwargs.get("max_places",12)
-    min_places=kwargs.get("min_places",10)
+    cancellation_event = kwargs.get("cancellation_event")
+    max_places=kwargs.get("max_places",9)
+    min_places=kwargs.get("min_places",8)
     loop = asyncio.get_running_loop()
     distance=int(main_questions.distance*1000)
+    type=main_questions.category
     budget= main_questions.budget
     longitude= main_questions.region.longitude
     latitude= main_questions.region.latitude
     experience_type=secondary_questions.experienceType
     location_types=secondary_questions.locationTypes
-    circle=Circle(
-        center=Center(
-            latitude=latitude,
-            longitude=longitude
-        ),
-        radius=distance
-    )
-    loc_restr = LocationRestriction(circle=circle)
+    randomize=True if type!="Itinerariu" else False
+
+    dist_condition=1000 if type!="Itinerariu" else 50
+    loc_restr=location_restriction(latitude,longitude,distance,randomize=randomize)
+
+    
 
     historyTypes = [
         {
@@ -48,7 +48,7 @@ async def history_alg(main_questions,secondary_questions,**kwargs):
         "info": "Cautam locatii din zona in care te afli..."
     }
 
-    raw_data=await fetch_places(historyTypes,loc_restr,EXTRA)
+    raw_data=await fetch_places(historyTypes,loc_restr,EXTRA,cancellation_event=cancellation_event)
     
     yield{
             "stage": "pas 2",
@@ -57,17 +57,16 @@ async def history_alg(main_questions,secondary_questions,**kwargs):
     
     ratios=[0.35,0.2,0.2,0.1]
     criteria_classification=["+","+","-","+"]
-    needs_normalization=[False,False,True,False]
 
     helpers_enrich=[
                     solve_photos]
     helpers_score=[partial( history_score_corr,exp_type=experience_type,score_map=EXTRA["QUERY_SCORE_MAP"]),
         partial(rating_score,condition=3.6,z=1.4),
-                   partial(dist,userLat=latitude,userLong=longitude,condition=2800,radius=distance,ratio=1.5),
+                   partial(dist,userLat=latitude,userLong=longitude,condition=dist_condition,radius=distance,ratio=1.5),
                    partial(price_score,budget=budget,sigma=0.45),
                    ]
     
-    cleaned_data=await enrich_all(raw_data,ENRICHED,helpers_enrich,CATEGORY_CONFIG)
+    cleaned_data,banned_places=await enrich_all(raw_data,ENRICHED,helpers_enrich,CATEGORY_CONFIG,cancellation_event=cancellation_event)
     
     for history_type,places in cleaned_data.items():
         loc_score_results = await loop.run_in_executor(
@@ -77,7 +76,8 @@ async def history_alg(main_questions,secondary_questions,**kwargs):
             helpers_score,
             ratios,
             criteria_classification,
-            needs_normalization,
+            banned_places,
+            cancellation_event,
             0.5,
             max_places,
             min_places

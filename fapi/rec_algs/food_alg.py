@@ -4,14 +4,18 @@ from fapi.constants.executors import DEFAULT_THREAD_POOL,DEFAULT_PROCESS_POOL
 from fapi.schemas import LocationRestriction,Circle,Center
 from fapi.constants.food_config import CATEGORY_CONFIG,EXTRA,ENRICHED
 from fapi.constants.general_config import PRICE_LEVEL_MAP
-from fapi.helpers.alg_helpers import fetch_places,enrich_all,compute_score,price_score,dist,rating_score,solve_photos
+from fapi.helpers.alg_helpers import fetch_places,enrich_all,compute_score,price_score,dist,rating_score,solve_photos,location_restriction
 from fapi.helpers.math_helpers import gauss_score
 from functools import partial
 from pprint import pprint
-async def food_alg(main_questions,secondary_questions,condition=1500):
+async def food_alg(main_questions,secondary_questions,condition=1500,**kwargs):
+    cancellation_event = kwargs.get("cancellation_event")
+    max_places=kwargs.get("max_places",12)
+    min_places=kwargs.get("min_places",10)
     loop = asyncio.get_running_loop()
     distance=int(main_questions.distance*1000)
     budget= main_questions.budget
+    type=main_questions.category
     longitude= main_questions.region.longitude
     latitude= main_questions.region.latitude
     food_types=secondary_questions.foodTypes
@@ -19,14 +23,12 @@ async def food_alg(main_questions,secondary_questions,condition=1500):
     vegan=secondary_questions.veganOptions
     outdoor=secondary_questions.outdoor
     restaurant_type=secondary_questions.locationType
-    circle=Circle(
-        center=Center(
-            latitude=latitude,
-            longitude=longitude
-        ),
-        radius=distance
-    )
-    loc_restr = LocationRestriction(circle=circle)
+
+    randomize=True if type!="Itinerariu" else False
+
+    dist_condition=1000 if type!="Itinerariu" else 50
+
+    loc_restr=location_restriction(latitude,longitude,distance,randomize=randomize)
 
     
 
@@ -44,30 +46,33 @@ async def food_alg(main_questions,secondary_questions,condition=1500):
         "info": "Cautam locatii din zona in care te afli..."
     }
 
-    raw_data=await fetch_places(Types,loc_restr,EXTRA)
+    raw_data=await fetch_places(Types,loc_restr,EXTRA,cancellation_event=cancellation_event)
     
     yield{
             "stage": "pas 2",
             "info": "pregatim locatiile si le filtram..."
         }
     
-    ratios=[0.2,0.1,0.15,0.15,0.1,0.15,0.15]
-    criteria_classification=["+","+","+","+","-","+","+"]
-    needs_normalization=[False,False,False,False,True,False,False]
+    ratios=[0.1,0.15,0.1,0.15,0.15,0.15,0.2]
+    criteria_classification=["+","+","-","+","+","+","+"]
 
     helpers_enrich=[partial(restaurant_type_enrich,map=PRICE_LEVEL_MAP),
                     solve_photos]
     helpers_score=[
-        partial(restaurant_type_score,restaurant_type_input=restaurant_type),
         partial(price_score,budget=budget,sigma=0.45),
         partial(rating_score,condition=3.6,z=1.4),
+        partial(dist,userLat=latitude,userLong=longitude,condition=dist_condition,radius=distance,ratio=1.5),
+        partial(vegan_score,vegan=vegan),
+        partial(outdoor_score,outdoor=outdoor),
         partial(meal_type_score,meal_type=meal_type),
-                   partial(dist,userLat=latitude,userLong=longitude,condition=condition,radius=distance,ratio=1.5),
-                   partial(vegan_score,vegan=vegan),
-                   partial(outdoor_score,outdoor=outdoor)
+        partial(restaurant_type_score,restaurant_type_input=restaurant_type),
+        
+        
+                   
+                   
                    ]
     
-    cleaned_data=await enrich_all(raw_data,ENRICHED,helpers_enrich,CATEGORY_CONFIG)
+    cleaned_data,banned_places=await enrich_all(raw_data,ENRICHED,helpers_enrich,CATEGORY_CONFIG,cancellation_event=cancellation_event)
     
     for type,places in cleaned_data.items():
         loc_score_results = await loop.run_in_executor(
@@ -77,8 +82,11 @@ async def food_alg(main_questions,secondary_questions,condition=1500):
             helpers_score,
             ratios,
             criteria_classification,
-            needs_normalization,
-            0.5
+            banned_places,
+            cancellation_event,
+            0.5,
+            max_places,
+            min_places,
             
         )
         cleaned_data[type]=loc_score_results
@@ -93,7 +101,7 @@ async def food_alg(main_questions,secondary_questions,condition=1500):
 def meal_type_score(place,meal_type):
     highlight=None
     meal_type_s=None
-    
+    types=place.get("types")
     if meal_type=="Mic-dejun":
         place_serves=place.get("breakfast","")
         if place_serves=="":
@@ -120,6 +128,8 @@ def meal_type_score(place,meal_type):
         place_serves=place.get("dinner","")
         if place_serves=="":
             meal_type_s=0.7
+        if place_serves=="" and "fast_food_restaurant" in types:
+            meal_type_s=0.5
         else:
             if place_serves:
                 highlight="Acest are in program servirea cinei!"
@@ -147,6 +157,9 @@ def outdoor_score(place,outdoor):
 
         highlight="Restaurantul are terasa!"
 
+    if not outdoor:
+        outdor_s=0
+
     return "outdoor_score",outdoor_s,highlight
 
 
@@ -158,6 +171,7 @@ def vegan_score(place,vegan):
     primary_type=place.get("primaryType","")
     serves_vegan=place.get("vegan","")
     if not types:
+        print("eroare la vegan score")
         raise Exception()
     
     if not vegan:
