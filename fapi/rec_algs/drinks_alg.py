@@ -76,7 +76,7 @@ async def drinks_alg(main_questions, secondary_questions, **kwargs):
         partial(price_score, budget=budget, sigma=0.45),
         partial(score_drink_type, drink_type=drink_type),
         partial(score_group, group=group),
-        partial(score_primary_type),
+        score_primary_type,
     ]
 
     cleaned_data, banned_places = await enrich_all(

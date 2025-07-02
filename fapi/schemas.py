@@ -1,41 +1,65 @@
-from pydantic import BaseModel, EmailStr,ConfigDict,Field
+from pydantic import BaseModel, EmailStr, ConfigDict, Field
 from beanie import PydanticObjectId
 from datetime import datetime
-from typing import Optional,Literal
+from typing import Optional, Literal
+
+
 class SecondaryQuestions(BaseModel):
-    model_config = ConfigDict(extra='allow')
+    model_config = ConfigDict(extra="allow")
+
+
+class ResetPasswordRequest(BaseModel):
+    email: EmailStr
+    code: str
+    new_password: str
+
+
+class ResetPasswordLoggedRequest(BaseModel):
+    code: str
+    new_password: str
+
+
+class CodeOnlyEmail(BaseModel):
+    email: EmailStr
+    code: str
+
 
 class AuthIn(BaseModel):
-    email:EmailStr
-    password: str
-   
-class UserChecker(BaseModel):
-    username:str
     email: EmailStr
-    password: str 
-    
+    password: str
+
+
+class UserChecker(BaseModel):
+    username: str
+    email: EmailStr
+    password: str
+
 
 class TokenOut(BaseModel):
     access_token: str
-    refresh_token:str
-    username:str=None
+    refresh_token: str
+    username: str = None
     token_type: str = "bearer"
+
 
 class Region(BaseModel):
     latitude: float
     latitude_delta: float
     longitude: float
     longitude_delta: float
-    
+
+
 class Shopping(BaseModel):
     shoppingExperience: list[str]
-    shoppingLocType:float
+    shoppingLocType: float
+
 
 class MainQuestions(BaseModel):
     budget: float
-    category:str
-    distance:float
+    category: str
+    distance: float
     region: Region
+
 
 class RecommendationDetail(BaseModel):
     id: PydanticObjectId = Field(..., alias="_id")
@@ -46,7 +70,6 @@ class RecommendationDetail(BaseModel):
 
     model_config = ConfigDict(
         validate_by_name=True,
-        
         json_encoders={PydanticObjectId: str},
     )
 
@@ -62,57 +85,67 @@ class RecommendationMeta(BaseModel):
         json_encoders={PydanticObjectId: str},
     )
 
+
 class ShoppingRequest(BaseModel):
     MainQuestions: MainQuestions
     ShoppingQuestions: Shopping
+
+
 class Center(BaseModel):
-    latitude:  float
+    latitude: float
     longitude: float
+
 
 class Circle(BaseModel):
     center: Center
     radius: int
+
 
 class LocationRestriction(BaseModel):
     circle: Circle
 
 
 class AutocompleteRequest(BaseModel):
-    input:str
-    
+    input: str
+
 
 class NearbySearch(BaseModel):
-    locationRestriction:LocationRestriction
+    locationRestriction: LocationRestriction
     includedTypes: list[str] = None
-    includedPrimaryTypes:list[str]=None
-    excludedTypes:list[str]=None
-    maxResultCount:int = 20
-    fieldMask: list[str] = ["places.displayName",
+    includedPrimaryTypes: list[str] = None
+    excludedTypes: list[str] = None
+    maxResultCount: int = 20
+    fieldMask: list[str] = [
+        "places.displayName",
         "places.primaryType",
         "places.rating",
         "places.types",
         "places.containingPlaces",
         "places.userRatingCount",
         "places.priceLevel",
-        ]
+    ]
+
+
 class TogglePayload(BaseModel):
     place_id: str
     add: bool
+
+
 class TextSearch(BaseModel):
     textQuery: str
-    locationBias:LocationRestriction
-    languageCode:str="en"
-    maxResultCount:int = 20
-    fieldMask: list[str] = ["places.displayName",
+    locationBias: LocationRestriction
+    languageCode: str = "en"
+    maxResultCount: int = 20
+    fieldMask: list[str] = [
+        "places.displayName",
         "places.primaryType",
         "places.types",
         "places.containingPlaces",
         "places.rating",
         "places.userRatingCount",
         "places.priceLevel",
-        ]
-    
+    ]
+
 
 class PlaceDetails(BaseModel):
     placeId: str
-    

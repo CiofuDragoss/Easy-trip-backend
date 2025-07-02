@@ -86,9 +86,9 @@ async def Process_Request(websocket: WebSocket):
     try:
         payload = await websocket.receive_json()
         main_q = MainQuestions.model_validate(payload["MainQuestions"])
-        type = main_q.category
+        type_cat = main_q.category
         shop_q = SecondaryQuestions.model_validate(payload["SecondaryQuestions"])
-        alg_function = ALG_MAP.get(type)
+        alg_function = ALG_MAP.get(type_cat)
         longitude = main_q.region.longitude
         latitude = main_q.region.latitude
         try:
@@ -100,7 +100,6 @@ async def Process_Request(websocket: WebSocket):
                 code=status.WS_1011_INTERNAL_ERROR,
                 reason="Probleme la server. Incercati din nou!",
             )
-            return
 
         location_for_bd = (
             f"{country_and_city.get('country','')}, {country_and_city.get('city','')}"
@@ -115,9 +114,10 @@ async def Process_Request(websocket: WebSocket):
                 break
 
             if update.get("data", ""):
-                pprint(update["data"])
+
                 data = jsonable_encoder(update["data"])
-                await save_recs(auth, data, type, location_for_bd)
+                if any(update.get("data", {}).values()):
+                    await save_recs(auth, data, type_cat, location_for_bd)
 
             await websocket.send_json(jsonable_encoder(update))
 
@@ -129,10 +129,9 @@ async def Process_Request(websocket: WebSocket):
                 return
 
     except WebSocketDisconnect:
-        print("WebSocket disconnected - triggering cancellation")
         cancellation_event.set()
 
-    except Exception:
+    except Exception as e:
         raise WebSocketException(
             code=status.WS_1011_INTERNAL_ERROR,
             reason="Nu am reusit sa gasim suficiente locatii. Incercati o alta locatie initiala sau o raza de cautare mai mare.",

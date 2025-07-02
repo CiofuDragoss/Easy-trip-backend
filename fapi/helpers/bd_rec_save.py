@@ -31,7 +31,6 @@ async def save_recs(token, rec_data, type, loc_bd):
 
 
 async def get_visited_set(token):
-    print("am obtinut visited set")
     token = token.split(" ")[1].strip()
 
     try:

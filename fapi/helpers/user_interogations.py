@@ -4,6 +4,7 @@ from pymongo.errors import DuplicateKeyError
 from fastapi import HTTPException, status
 
 
+# creaza user
 async def create_user(user_data: dict) -> User:
     try:
         user = User(**user_data)

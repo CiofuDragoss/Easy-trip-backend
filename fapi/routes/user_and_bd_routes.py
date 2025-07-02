@@ -18,8 +18,16 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     user = await models.User.find_one(models.User.email == email)
     if not user:
         raise HTTPException(401, "Invalid authentication credentials")
-    print("user este:", user)
     return user
+
+
+@router.delete("/rec_operations", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_all_recs(current_user: models.User = Depends(get_current_user)):
+    await models.Recommendation.find(
+        models.Recommendation.user.id == current_user.id
+    ).delete()
+
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @router.post(
@@ -50,7 +58,7 @@ async def add_remove_banned(payload: schemas.TogglePayload):
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-@router.get("/get_all_recs", response_model=List[RecommendationMeta])
+@router.get("/rec_operations", response_model=List[RecommendationMeta])
 async def get_all_recs(current_user: models.User = Depends(get_current_user)):
     recs = await (
         models.Recommendation.find(models.Recommendation.user.id == current_user.id)
@@ -60,20 +68,17 @@ async def get_all_recs(current_user: models.User = Depends(get_current_user)):
     )
 
     if not recs:
-        return {}
-    print(recs)
+        return []
     return recs
 
 
 @router.get(
-    "/get_rec/{rec_id}",
+    "/single_rec/{rec_id}",
     response_model=RecommendationDetail,
     summary="Fetch a single recommendation by its ID",
 )
 async def get_recommendation(
-    rec_id: PydanticObjectId = Path(
-        ..., description="The MongoDB ObjectId of the recommendation"
-    ),
+    rec_id: PydanticObjectId = Path(..., description="The MongoDB id of the rec"),
     current_user: models.User = Depends(get_current_user),
 ):
 
@@ -83,3 +88,39 @@ async def get_recommendation(
     if not rec:
         raise HTTPException(status_code=404, detail="Recommendation not found")
     return rec
+
+
+@router.delete(
+    "/single_rec/{rec_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Delete a single rec",
+)
+async def delete_recommendation(
+    rec_id: PydanticObjectId = Path(..., description="The MongoDB id of the rec"),
+    current_user: models.User = Depends(get_current_user),
+):
+
+    rec = await models.Recommendation.find_one(
+        {"_id": rec_id, "user.$id": current_user.id}
+    )
+    if not rec:
+        raise HTTPException(status_code=404, detail="Recommendation not found")
+
+    await rec.delete()
+
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.delete("/delete_account", status_code=status.HTTP_204_NO_CONTENT, summary="")
+async def delete_account(current_user: models.User = Depends(get_current_user)):
+    user_id = current_user.id
+
+    await models.Recommendation.find(models.Recommendation.user.id == user_id).delete()
+
+    await models.JwtTokens.find(models.JwtTokens.user.id == user_id).delete()
+
+    await models.VisitedPlaces.find(models.VisitedPlaces.user.id == user_id).delete()
+
+    await current_user.delete()
+
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

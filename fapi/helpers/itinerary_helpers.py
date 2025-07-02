@@ -614,7 +614,6 @@ async def best_experience_cultural(
     }
     if cultural:
         alg = history_alg
-        main_q["category"] = "cultural"
 
         sec_q = {
             "experienceType": type_cultural,
@@ -623,7 +622,6 @@ async def best_experience_cultural(
 
     else:
         alg = experience_alg
-        main_q["category"] = "experiences"
 
         sec_q = {
             "indoorOutdoor": random.choice(["ambele", "indoor", "outdoor"]),
