@@ -51,7 +51,7 @@ def dist(place, userLat, userLong, radius, condition=10, ratio=1.5):
     dist = haversine_distance(latitude, longitude, userLat, userLong)
     if dist < 1300:
 
-        highlight = "Locatia este foarte aproape de tine!"
+        highlight = "Locatia este foarte aproape de dumneavostra!"
     if condition and (dist - radius) > condition:
         raise Exception("conditie dist")
 
@@ -258,7 +258,9 @@ async def enrich_all(raw_data, extract, extra_funcs, config, cancellation_event=
                 query = resp.get("search_QUERY", "")
                 for place in resp.get("places", []):
                     place_id = place.get("id")
+
                     # daca verify_place este false sau daca place_id in placeId_set continuam ,nu il luam in considerare
+
                     if place_id in placeId_set:
 
                         continue
@@ -314,7 +316,6 @@ def compute_score(
     min_places=8,
 ):
     if not cleaned_data:
-        print("n am cleaned data")
         return []
     # initializare de variabile
     loc_score_results = []
@@ -352,24 +353,21 @@ def compute_score(
 
         # conditii de ignorare
         if skip:
-            print("scot aici", skip)
             continue
 
         if place.get("placeId") in banned_places:
-            print("scot in banned places")
             continue
         # adaugam si placeId-ul locului pentru identificare dupa ce aplicam vikor (vom recombina cu datele sale intiale)
         loc_scores["placeId"] = place.get("placeId")
 
-        """ print("\n")
-        print("types:",place.get("types",[]))
-        print("place id:",place.get("placeId"))
-        print("primary type:",place.get("primaryType"))
-        print("display name:",place.get("display"))
-        print("serch query:",place.get("search_QUERY"))
-        print("category:",place.get("category"))
-        print("dist",place.get("distance"))
-        """
+        """print("\n")
+        print("types:", place.get("types", []))
+        print("place id:", place.get("placeId"))
+        print("primary type:", place.get("primaryType"))
+        print("display name:", place.get("display"))
+        print("serch query:", place.get("search_QUERY"))
+        print("category:", place.get("category"))
+        print("dist", place.get("distance"))"""
 
         # adaugam locul (doar cu criterii si scoruri)
         loc_score_results.append(loc_scores)

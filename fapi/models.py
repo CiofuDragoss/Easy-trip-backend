@@ -79,3 +79,7 @@ class BannedPlace(Document):
     place_id: str = Field(..., unique=True)
 
     ban_count: int = Field(default=0)
+
+    class Settings:
+        name = "banned_places"
+        indexes = [IndexModel([("place_id", ASCENDING)], unique=True)]

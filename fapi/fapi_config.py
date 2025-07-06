@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 # Încărcăm variabilele din fișierul .env
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), "./.env"))
 
+
 class Settings:
     secret_key: str = os.getenv("SECRET_KEY", "")
     secret_key_refresh: str = os.getenv("SECRET_KEY_REFRESH", "")
@@ -20,23 +21,14 @@ class Settings:
     google_api: str = os.getenv("GOOGLE_API", "")
     foursquare: str = os.getenv("FOURSQUARE", "")
 
-    google_autocomplete_url: str = os.getenv(
-        "GOOGLE_AUTOCOMPLETE_URL", ""
-    )
-    google_places_details: str = os.getenv(
-        "GOOGLE_PLACES_DETAILS_URL", ""
-    )
-    google_places_nearby_search: str = os.getenv(
-        "GOOGLE_PLACES_NEARBYSEARCH_URL", ""
-    )
-    google_places_text_search: str = os.getenv(
-        "GOOGLE_PLACES_TEXTSEARCH_URL", ""
-    )
-    google_weather_api:str=os.getenv(
-        "GOOGLE_WEATHER_URL",""
-    )
-    google_geocoding_api:str=os.getenv(
-        "GOOGLE_GEOCODING_URL",""
-    )
+    google_autocomplete_url: str = os.getenv("GOOGLE_AUTOCOMPLETE_URL", "")
+    google_places_details: str = os.getenv("GOOGLE_PLACES_DETAILS_URL", "")
+    google_places_nearby_search: str = os.getenv("GOOGLE_PLACES_NEARBYSEARCH_URL", "")
+    google_places_text_search: str = os.getenv("GOOGLE_PLACES_TEXTSEARCH_URL", "")
+    google_weather_api: str = os.getenv("GOOGLE_WEATHER_URL", "")
+    google_geocoding_api: str = os.getenv("GOOGLE_GEOCODING_URL", "")
+    email_smtp: str = os.getenv("EMAIL", "")
+    email_smtp_app_pass: str = os.getenv("EMAIL_APP_PASS", "")
+
 
 settings = Settings()

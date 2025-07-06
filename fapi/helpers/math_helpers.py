@@ -30,19 +30,20 @@ import math
 
 
 def haversine_distance(lat1, lon1, lat2, lon2):
-    # Raza medie a Pamantului în metri
+    # Raza terra
     R = 6_371_000
 
-    # Convertim grade în radiani
-    φ1 = math.radians(lat1)
-    φ2 = math.radians(lat2)
-    Δφ = math.radians(lat2 - lat1)
-    Δλ = math.radians(lon2 - lon1)
+    phi1 = math.radians(lat1)
+    phi2 = math.radians(lat2)
+    delta_phi = math.radians(lat2 - lat1)
+    delta_lambda = math.radians(lon2 - lon1)
 
     # Formula Haversine
-    a = math.sin(Δφ / 2) ** 2 + math.cos(φ1) * math.cos(φ2) * math.sin(Δλ / 2) ** 2
+    a = (
+        math.sin(delta_phi / 2) ** 2
+        + math.cos(phi1) * math.cos(phi2) * math.sin(delta_lambda / 2) ** 2
+    )
     c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
 
-    # Distanta
     distance = R * c
-    return distance
+    return int(distance)

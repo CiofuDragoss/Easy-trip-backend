@@ -36,7 +36,7 @@ async def refresh_token(token_data: dict = Depends(verify_token_refresh)):
     new_refresh = create_jwt_t(email, refresh=True)
     new_access = create_jwt_t(email, refresh=False)
     print("asta e user id", user_id)
-    result = await JwtTokens.get_motor_collection().update_one(
+    await JwtTokens.get_motor_collection().update_one(
         {"user": user_id},
         {"$set": {"token": new_refresh}},
     )

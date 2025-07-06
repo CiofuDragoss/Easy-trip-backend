@@ -62,10 +62,7 @@ async def get_placeid_loc(req: PlaceDetails):
         "X-Goog-FieldMask": "location",
     }
 
-    print("DETAILSLS", DETAILS_URL)
-
     response = await http_client.get(f"{DETAILS_URL}/{req.placeId}", headers=headers)
-    print(response.json())
     if response.status_code != 200:
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
@@ -101,16 +98,13 @@ async def location_autocomplete(input: str = Query(...)):
     response = await http_client.post(AUTOCOMPLETE_URL, json=body, headers=headers)
 
     if response.status_code != 200:
-        print(response)
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail="Eroare la a comunica cu Api-ul de recomandari google!",
         )
 
     data = response.json()
-    print(data)
     predictions = data.get("suggestions", [])
-    print(predictions)
     results = []
     for prediction in predictions:
         sf = prediction["placePrediction"]

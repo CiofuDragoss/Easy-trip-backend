@@ -19,4 +19,5 @@ async def init_db():
             BannedPlace,
             Code,
         ],
+        allow_index_dropping=True,
     )

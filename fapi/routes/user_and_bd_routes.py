@@ -36,7 +36,6 @@ async def delete_all_recs(current_user: models.User = Depends(get_current_user))
     responses={204: {"description": "No Content"}},
 )
 async def add_remove_banned(payload: schemas.TogglePayload):
-    print(payload)
     p_id = payload.place_id
     add = payload.add
 

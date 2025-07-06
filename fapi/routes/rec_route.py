@@ -11,20 +11,10 @@ from fastapi import (
     WebSocketException,
 )
 from fapi.schemas import (
-    NearbySearch,
-    ShoppingRequest,
-    Circle,
-    Center,
-    LocationRestriction,
-    TextSearch,
     SecondaryQuestions,
     MainQuestions,
 )
-from fapi.helpers.jwt_helpers import verify_token_access
 from fapi.routes.google_routes import (
-    google_nearby_search,
-    google_text_search,
-    google_details,
     reverse_geocode,
 )
 from fapi.fapi_config import settings
@@ -132,6 +122,7 @@ async def Process_Request(websocket: WebSocket):
         cancellation_event.set()
 
     except Exception as e:
+        print(e)
         raise WebSocketException(
             code=status.WS_1011_INTERNAL_ERROR,
             reason="Nu am reusit sa gasim suficiente locatii. Incercati o alta locatie initiala sau o raza de cautare mai mare.",

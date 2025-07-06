@@ -7,7 +7,7 @@ import csv
 
 # testat pe contul dragoscoff2@gmail.com
 BASE_URL = "ws://localhost:8000/ws/recommend"
-DUMMY_TOKEN = "Bearer aici se pune jwt-ul de access"
+DUMMY_TOKEN = "Bearer eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkcmFnb3Njb2ZmQGdtYWlsLmNvbSIsImV4cCI6MTc1MTgwMzgzN30.XiNQHiF0WS2hXUwIUPWkmDPz5vTYx7NzCc29wdtR3FyOpe0a66YxLelKPtVmTiTc38amaSrWmX5K0LshtZTE7g"
 USER_COUNT = 20
 TIMEOUT_SECONDS = 25
 CSV_FILE = "results_test_experiences.csv"

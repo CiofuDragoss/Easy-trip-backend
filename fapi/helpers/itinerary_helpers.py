@@ -15,12 +15,8 @@ from fapi.helpers.alg_helpers import (
     location_restriction,
 )
 from fapi.rec_algs.nightlife_alg import nightlife_alg
-from fapi.constants.general_config import PRICE_LEVEL_MAP
 from fapi.constants.executors import DEFAULT_THREAD_POOL
 from fapi.schemas import (
-    LocationRestriction,
-    Circle,
-    Center,
     SecondaryQuestions,
     MainQuestions,
 )
@@ -55,8 +51,6 @@ async def first_period(
     included=False,
     cancellation_event=None,
 ):
-    print("shopping estee:", shopping)
-    print("tipe cultural:", type_cultural)
     excluded_types = ["movie_theater"]
 
     local_set = global_set
@@ -81,7 +75,7 @@ async def first_period(
     duration_walk = calculate_walking_speed(food_place, intensity)
     activity_duration = 45 - 15 * intensity
     final_first_period[
-        f"Incepeti ziua cu micul dejun la {food_place.get('display')}.Aveti de mers {duration_walk} de la locatia dumneavostra.{"Parcurgeti traseul in ordine, altfel riscati sa mergeti mult intre locatii" if itinerary_type=="Dimineata" else ""}"
+        f"Incepeti ziua cu micul dejun la {food_place.get('display')}. Aveti de mers aproximativ {duration_walk} minute de la locatia dumneavostra. Parcurgeti traseul in ordine, altfel riscati sa mergeti mult intre locatii!"
     ] = [food_place]
     time -= activity_duration + duration_walk
     start_hour += round((activity_duration + duration_walk) / 60)
@@ -161,7 +155,7 @@ async def second_period(
     duration_walk = calculate_walking_speed(food_place, intensity)
     activity_duration = 60 - 15 * intensity
     final_second_period[
-        f"Luati pranzul la {food_place.get('display')}.Aveti de mers aproximativ {duration_walk} minute pana la restaurant.{"Parcurgeti traseul in ordine, altfel riscati sa mergeti mult de la o locatie la alta!" if itinerary_type=="Dupa masa" else ""}"
+        f"Luati pranzul la {food_place.get('display')}.Aveti de mers aproximativ {duration_walk} minute pana la restaurant.{'Parcurgeti traseul in ordine, altfel riscati sa mergeti mult de la o locatie la alta!' if itinerary_type=='Dupa masa' else ''}"
     ] = [food_place]
     time -= activity_duration + duration_walk
     start_hour += round((activity_duration + duration_walk) / 60)
@@ -249,12 +243,26 @@ async def shopping_cultural_experience_loop(
     first_period=False,
 ):
     first_activ = False
-    while time > 0:
+    is_first_period = first_period
+    is_second_period = not first_period
+
+    wants_break_morning = break_day_time == "In prima parte a zilei"
+    wants_break_afternoon = break_day_time == "Dupa masa"
+    while time > 10 and start_hour <= 22:
         if cancellation_event and cancellation_event.is_set():
             return []
         print("ora de inceput:", start_hour)
+        print("a mai ramas :", time)
 
-        if first_activ and wants_break and break_day_time == "Dupa masa":
+        if (
+            first_activ
+            and wants_break
+            and (
+                (is_first_period and wants_break_morning)
+                or (is_second_period and wants_break_afternoon)
+            )
+        ):
+
             break_place = await call_break(
                 init_loc_restr,
                 break_type,
@@ -264,6 +272,7 @@ async def shopping_cultural_experience_loop(
                 local_set,
                 cancellation_event,
             )
+
             local_set.add(break_place.get("placeId"))
             duration_walk = calculate_walking_speed(break_place, intensity)
             activity_duration = 50 - 20 * intensity
@@ -271,13 +280,12 @@ async def shopping_cultural_experience_loop(
             start_hour += round((activity_duration + duration_walk) / 60)
             init_loc_restr = get_new_restriction(break_place)
             final_second_period[
-                f"Faceti o pauza  la {break_place.get('display')}. Dureaza aproximativ {duration_walk} minute sa ajungeti."
+                f"Faceti o pauza de la program la {break_place.get('display')}. Dureaza aproximativ {duration_walk} minute sa ajungeti."
             ] = [break_place]
             wants_break = False
 
             continue
         if first_activ and shopping:
-            print("sunt la SHOPPINGGG")
             shopping_place = await best_shopping(
                 budget,
                 intensity,
@@ -295,7 +303,7 @@ async def shopping_cultural_experience_loop(
             start_hour += round((activity_duration + duration_walk) / 60)
             init_loc_restr = get_new_restriction(shopping_place)
             final_second_period[
-                f"Veti gasi cele mai bune produse din categoria {shopping_place.get('category')} la {shopping_place.get('display')}.Dureaza {duration_walk} sa ajungeti."
+                f"Veti gasi cele mai bune produse din categoria {shopping_place.get('category').lower()} la {shopping_place.get('display')}.Dureaza aproximativ {duration_walk} minute sa ajungeti."
             ] = [shopping_place]
             shopping = False
             continue
@@ -327,15 +335,15 @@ async def shopping_cultural_experience_loop(
         init_loc_restr = get_new_restriction(activity_place)
         if not first_activ:
             key = (
-                f"Dupa ce terminati de luat {'micul dejun' if first_period else 'pranzul'}, vizitati {activity_place.get('display')}, veti invata multe si veti avea parte de o experienta culturala de neuitat.Dureaza {duration_walk} minute sa ajungeti."
+                f"Dupa ce terminati de luat {'micul dejun' if first_period else 'pranzul'}, vizitati {activity_place.get('display')}, bucurati-va de valoarea culturala a locatiei . Dureaza aproximativ {duration_walk} minute sa ajungeti."
                 if activity_place.get("place_type_cat") == "cultural"
-                else f"Dupa ce terminati de servit pranzul, incepeti programul cu o experienta placuta la {activity_place.get('display')}.Dureaza aproximativ {duration_walk} minute sa ajungeti."
+                else f"Dupa ce terminati de servit {'micul dejun' if first_period else 'pranzul'}, incepeti programul cu o experienta la {activity_place.get('display')}.Dureaza aproximativ {duration_walk} minute sa ajungeti."
             )
         else:
             key = (
-                f"Continuati programul vizitand {activity_place.get('display')}.Bucurati-va de experienta culturala oferita de locatie.Dureaza {duration_walk} minute sa ajungeti."
+                f"Viziati {activity_place.get('display')}. Bucurati-va de experienta culturala oferita de locatie. Dureaza aproximativ {duration_walk} minute sa ajungeti."
                 if activity_place.get("place_type_cat") == "cultural"
-                else f"Continuati programul cu o experienta placuta la {activity_place.get('display')}.Dureaza aproximativ {duration_walk} minute sa ajungeti."
+                else f"Vizitati {activity_place.get('display')}. Dureaza aproximativ {duration_walk} minute sa ajungeti."
             )
         final_second_period[key] = [activity_place]
 
@@ -368,7 +376,7 @@ def check_hour_and_set_places(places, places_set, day, hour):
     sorted_places = sorted(all_places, key=lambda x: x["Q"])
 
     sorted_places = [
-        place for place in sorted_places if is_open(place, day, hour, offset=2)
+        place for place in sorted_places if is_open(place, day, hour, offset=1)
     ]
 
     check_set(sorted_places, places_set)
@@ -410,7 +418,7 @@ async def break_alg(loc_restr, break_type, budget, cancellation_event):
     helpers_enrich = [
         solve_photos,
     ]
-    enriched_data = await enrich_all(
+    enriched_data, banned_places = await enrich_all(
         raw_data,
         ENRICHED_RELAX,
         helpers_enrich,
@@ -447,6 +455,7 @@ async def break_alg(loc_restr, break_type, budget, cancellation_event):
             helpers_score,
             ratios,
             criteria_classification,
+            banned_places,
             cancellation_event,
             0.5,
             12,
@@ -496,7 +505,6 @@ async def best_food_place(
     iters = 0
     while not sorted_food_places and iters < 5:
         iters += 1
-        print("iteratia:", iters)
         if cancellation_event and cancellation_event.is_set():
             return {}
         alg_gen = food_alg(
@@ -505,7 +513,6 @@ async def best_food_place(
         try:
             async for update in alg_gen:
                 if cancellation_event and cancellation_event.is_set():
-                    print("sunt aiciii in food")
                     break
                 if any(update.get("data", {}).values()):
                     food_places = update["data"]
@@ -525,7 +532,7 @@ async def best_food_place(
 
     if not sorted_food_places:
         raise Exception()
-    best_food_place = min(sorted_food_places, key=lambda x: x["distance"])
+    best_food_place = min(sorted_food_places[:3], key=lambda x: x["distance"])
     return best_food_place, hour
 
 
@@ -641,8 +648,8 @@ async def best_experience_cultural(
         alg_gen = alg(
             main_q,
             sec_q,
-            max_places=12,
-            min_places=10,
+            max_places=8,
+            min_places=12,
             nearby_excluded_types=excluded_types,
             cancellation_event=cancellation_event,
         )
@@ -668,7 +675,6 @@ async def best_experience_cultural(
             if iters > 2:
                 sec_q.indoorOutdoor = "ambele"
         main_q.distance += 0.3 * iters
-        print("lungime sorted places dupa final bucla experience:", len(sorted_places))
     best_place = min(sorted_places, key=lambda x: x["distance"])
     best_place["place_type_cat"] = "cultural" if cultural else "experience"
     return best_place
@@ -843,4 +849,8 @@ async def best_end_day(
             }
             alg = nightlife_alg
     best_place = min(sorted_places, key=lambda x: x["distance"])
+    highlights = best_place["highlights"]
+
+    highlights[:] = [t for t in highlights if "perioada" not in t.lower()]
+
     return best_place

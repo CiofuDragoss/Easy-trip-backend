@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, status, Request
 from fapi.helpers.jwt_helpers import verify_token_access
 from fapi.fapi_config import settings
-from fapi.schemas import NearbySearch, TextSearch, PlaceDetails
+from fapi.schemas import NearbySearch, TextSearch
 from fapi.constants.general_config import (
     NEARBY_SEARCH_URL,
     TEXT_SEARCH_URL,
@@ -11,7 +11,6 @@ from fapi.constants.general_config import (
 )
 import httpx
 import asyncio
-from fapi.constants.semaphores import SEMAPHORE_DETAILS, SEMAPHORE_PHOTOS
 from pprint import pprint
 
 
@@ -62,7 +61,6 @@ async def reverse_geocode(lat, lng):
 
     data = r.json()
     if data.get("status") != "OK" or not data.get("results"):
-        print(data)
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Nu am gasit rezultate pentru coordonate.",

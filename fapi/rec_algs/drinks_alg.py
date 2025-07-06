@@ -1,5 +1,5 @@
 import asyncio
-from fapi.constants.executors import DEFAULT_THREAD_POOL, DEFAULT_PROCESS_POOL
+from fapi.constants.executors import DEFAULT_THREAD_POOL
 from fapi.schemas import LocationRestriction, Circle, Center
 from fapi.constants.drink_config import CATEGORY_CONFIG, EXTRA, ENRICHED
 from fapi.constants.general_config import PRICE_LEVEL_MAP

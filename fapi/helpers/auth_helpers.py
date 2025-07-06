@@ -4,6 +4,7 @@ from fapi.models import Code, User
 from fastapi import HTTPException
 import random
 import asyncio
+from fapi.fapi_config import settings
 
 email_semaphore = asyncio.Semaphore(3)
 
@@ -11,18 +12,18 @@ email_semaphore = asyncio.Semaphore(3)
 async def send_email(recipient: str, code: str):
     async with email_semaphore:
         message = EmailMessage()
-        message["From"] = "nume@domeniul-tau.com"
+        message["From"] = settings.email_smtp
         message["To"] = recipient
         message["Subject"] = "Cod EasyTrip"
-        message.set_content(f"Salut! Codul tau este: {code}.Expira in 15 minute.")
+        message.set_content(f"Salut! Codul tau este: {code}. Expira in 15 minute.")
 
         await aiosmtplib.send(
             message,
             hostname="smtp.gmail.com",
             port=587,
             start_tls=True,
-            username="dragoscoff@gmail.com",
-            password="yijx wzyy lfbl gfjc",
+            username=settings.email_smtp,
+            password=settings.email_smtp_app_pass,
         )
 
 
